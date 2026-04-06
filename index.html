@@ -1,3 +1,212 @@
+
+I want to create a simple mood tracking interface with proactively nudges me 3 times per day (morning, mid day, and night) to help me measure and track my  mood fluctuations. The interface should be really simple and use a star measurement system (1-5 stars) with the ability to choose quarter or half star options. Each nudge should also prompt a one word reflection to correspond with the rating.
+
+4:35 PM
+
+Viewed a file, created a file, read a file
+Viewed a file, created a file, read a file
+Here's Pulse — your daily mood tracker. Here's what's built in:
+
+Rating system — click anywhere on a star to get quarter-star precision (0.25 increments). Hover shows a live fractional preview below the stars.
+
+Three daily check-ins — Morning (8am), Mid-day (12:30pm), and Night (9pm). Each has a contextual prompt, the star rating, and a one-word reflection field (enforces single word).
+
+Nudges — the app requests browser notification permission on load and queues timed alerts for each uncompleted check-in. The in-app banner also fires at each window.
+
+History & trend — a 7-day sparkline chart and a scrollable log below your daily cards, seeded with demo data so you can see the layout immediately.
+
+Persistence — everything saves to localStorage, so your data survives page refreshes.
+
+A few things worth noting for your workflow:
+
+Since this runs locally in the browser, the scheduled nudges only fire while the tab is open. For true background nudges, you'd want to pin this tab or convert it to a simple PWA — happy to help with that if you want
+The one-word field rejects spaces, keeping it to a single word as intended
+You can clear demo data by opening DevTools → Application → Local Storage and deleting the pulse_data key
+Mood tracker
+Code · HTML 
+Let’s convert it to a simple PWA
+
+4:40 PM
+
+Reading the existing mood tracker HTML
+Reading the existing mood tracker HTML
+Good — I have the full file. A proper PWA needs three files: the main index.html, a manifest.json, and a service-worker.js. The service worker is the key piece — it handles background push notifications so nudges fire even when the tab is closed. Let me build all three.
+
+
+Created 4 files
+Created 4 files
+Now the main index.html — updated with the manifest link, SW registration, push subscription flow, and a setup screen that walks through install + notification permission:
+
+
+Main index.html for Pulse PWA - full app with SW registration and push notifications
+Main index.html for Pulse PWA - full app with SW registration and push notifications
+Now a clear README with setup instructions:
+
+
+Created a file, read a file
+Created a file, read a file
+Here's your complete PWA package — 6 files to download and deploy together.
+
+What was added/changed:
+
+The service-worker.js handles two things: caches all assets so the app works fully offline after first load, and routes notification clicks back to the app when it's not in focus. The manifest.json tells the browser this is an installable app with a dark theme and proper icons. index.html now has the manifest link, safe-area insets for iPhone notches, touch-optimized star interactions, and a setup banner that walks through enabling notifications on first open.
+
+Deploying (the README has full detail, but the short version):
+
+The fastest path is Netlify drop — go to netlify.com, drag the entire pulse-pwa folder onto the dashboard, and you get a live URL in about 30 seconds. Then on your iPhone, open the URL in Safari → Share → Add to Home Screen. That's it — it'll appear as a proper app icon with no browser chrome.
+
+One honest caveat on background nudges: The nudges fire reliably when the app is open or the tab is active. True background delivery (fires when the app is fully closed) requires a push server sending a signal at the right time — there's no way around that with a pure static file. The README has notes on the easiest paths forward if you want to add that layer later.
+
+Index
+Code · HTML 
+Service worker
+JS 
+Manifest
+Code · JSON 
+Icon 192
+Image · SVG 
+Icon 512
+Image · SVG 
+Readme
+Document · MD 
+I’ve never done the GitHub route and need some additional direction
+
+4:58 PM
+Happy to walk you through it — it's genuinely simple once you see it once.
+
+Step 1 — Create a GitHub account Go to github.com and sign up. Free tier is all you need.
+
+Step 2 — Create a new repository Once logged in, click the + in the top right → "New repository." Name it something like pulse-mood. Make sure it's set to Public (required for free GitHub Pages). Leave everything else as-is and click "Create repository."
+
+Step 3 — Upload your files On the repository page you'll see a link that says "uploading an existing file" — click that. Drag all 6 files from the pulse-pwa folder onto the upload area. Make sure you're uploading the files themselves, not the folder. Then scroll down and click Commit changes.
+
+Step 4 — Enable GitHub Pages Go to Settings (tab at the top of your repo) → scroll down the left sidebar to Pages. Under "Source," select Deploy from a branch, choose main branch and / (root) folder, then click Save.
+
+Step 5 — Wait ~60 seconds GitHub will build and deploy. Refresh the Pages settings screen until you see a green banner with your URL — it'll be something like https://yourusername.github.io/pulse-mood/.
+
+Step 6 — Add to your iPhone home screen Open that URL in Safari (must be Safari, not Chrome, for the Add to Home Screen option to work as a real PWA). Tap the Share icon → scroll down → Add to Home Screen → Add. Pulse will appear as a full-screen app on your home screen with the gold star icon.
+
+The whole thing should take under 10 minutes. Let me know where you get stuck.
+
+I’m having trouble with the upload step
+
+4:59 PM
+What's the specific snag? A few common ones at that step:
+
+The drag target isn't appearing — after clicking "uploading an existing file," you should land on a page with a big dashed box that says "Drag files here." If you don't see it, try a different browser (Chrome works well for this).
+
+You're dragging the folder instead of the files — open the pulse-pwa folder on your Mac first, then select all 6 files inside it (Cmd+A), and drag that selection onto the GitHub page. GitHub doesn't accept folders via drag-and-drop, only individual files.
+
+You can't find the "uploading an existing file" link — if your repo was just created and is empty, it shows on the main repo page as a small text link in the middle of the screen. It's easy to miss. Alternatively, you can click the Add file button (top right of the file list area) → "Upload files."
+
+Which of those is closest to what you're seeing, or is it something different?
+
+Maybe the issue is trying to do this on my phone. I will try on my Mac later
+
+5:00 PM
+That's almost certainly it — the GitHub drag-and-drop upload really doesn't work well on mobile. On your Mac it'll be smooth, maybe 2 minutes for the whole upload step.
+
+When you sit down at your Mac, just pick up at Step 3 — your repo is already created so you're most of the way there. Let me know how it goes.
+
+How can I clear demo data?
+
+6:12 PM
+On your Mac, open the app in your browser and:
+
+Right-click anywhere on the page → Inspect (or Cmd+Option+I)
+Click the Application tab at the top of DevTools
+In the left sidebar, expand Local Storage → click the entry that shows your app's URL
+Find the row with the key pulse_data → click it → hit the Delete key
+Refresh the page and you'll start fresh with no demo entries.
+
+On your iPhone after you've installed it as a PWA, there's no DevTools access, so the easiest path is to add a small clear button to the app. Want me to add that to the code — something discreet like a reset option tucked in the header?
+
+Yes, please add that clear button and let me know the steps to update in Github
+
+6:13 PM
+
+Edited 3 files, viewed a file, read a file
+Edited 3 files, viewed a file, read a file
+Done. There's now a quiet "Reset" label in the top-right corner of the header. Tapping it opens a confirmation overlay before anything is deleted — no accidental wipes.
+
+To update on GitHub — you only need to replace index.html, since that's the only file that changed:
+
+Go to your repository on github.com
+Click on index.html in the file list
+Click the pencil icon (Edit) in the top-right of the file preview
+Select all the text in the editor (Cmd+A) and delete it
+Open the new index.html you just downloaded, select all (Cmd+A), copy, and paste it into the GitHub editor
+Scroll down and click Commit changes
+GitHub Pages will redeploy automatically in about 60 seconds. Refresh the app on your phone and the Reset button will be there.
+
+Index
+Code · HTML 
+Is there anything about the app that you'd recommend we improve?
+
+6:20 PM
+A few things come to mind across different categories:
+
+Functional gaps
+
+The biggest one is the background nudge limitation I mentioned — right now if the app tab is closed, no nudge fires. For a habit-forming tool, that's a meaningful gap. A Cloudflare Worker could handle this with minimal setup and no cost, if you ever want to tackle it.
+
+There's also no way to edit a submitted entry. If you fat-finger a word or tap the wrong star count, your only option right now is nuking everything with the reset button. A simple tap-to-edit on completed cards would fix that.
+
+Tracking depth
+
+The one-word reflection is intentionally minimal, which I like — but there's no way to spot patterns in your words over time. A simple word frequency view ("you've used 'anxious' 6 times this week") could surface something useful without adding much complexity.
+
+Right now the trend chart only shows daily averages, flattening the within-day variation. Given that you specifically wanted to track mood fluctuations, a view that plots all three daily check-ins as separate points on the same line would actually show your intraday arc — which seems like the whole point.
+
+Experience polish
+
+The app resets the notification permission banner when you clear data, which is slightly annoying if you're just clearing demo entries. Those two things should probably be decoupled.
+
+On iPhone there's no haptic feedback on star selection — a subtle vibration on tap would make the rating feel more tactile and satisfying.
+
+Of those, I'd prioritize tap-to-edit and the intraday chart as the highest value. The nudge infrastructure is the most impactful but also the most work. Want me to take a swing at any of them?
+
+Lets tackle all three
+
+6:21 PM
+Let me work through them in order — tap-to-edit, intraday chart, and decoupling the notification banner from reset.
+
+
+Reading full current index.html
+Reading full current index.html
+Good, I have the full picture. Now I'll rebuild index.html with all three improvements baked in cleanly:
+
+
+Created 2 files, ran a command, read a file
+Created 2 files, ran a command, read a file
+Done — only index.html changed, so that's the only file you need to update on GitHub.
+
+What's new:
+
+Tap-to-edit — completed cards now show a faint "Edit" label on hover/press. Tapping anywhere on a completed card reopens the full form pre-filled with your existing rating and word. The submit button changes to "Update check-in" so it's clear you're editing. Cancel drops you back to the completed view without saving.
+
+Intraday chart — the trend section now has a Daily / Today toggle. "Today" plots your three check-ins as separate color-coded nodes (morning orange, midday gold, night blue) connected by a faint dashed line, with the rating value above each dot and your one-word reflection below. Pending periods show as empty rings so you can see what's still outstanding at a glance.
+
+Decoupled notification banner — clearing your data no longer resets the notification preference. The banner only re-appears if your browser permission is genuinely unresolved (i.e., you never answered it), not just because you wiped your entries.
+
+To update on GitHub:
+
+Go to your repo → click index.html
+Click the pencil (Edit) icon
+Select all → delete → paste in the new file contents
+Click Commit changes
+That's it — one file, same steps as before.
+
+Index
+Code · HTML 
+
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+Index · HTML
+Copy
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,9 +236,9 @@
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
-
+ 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
   body {
     background: var(--bg);
     color: var(--text);
@@ -42,7 +251,7 @@
     padding: 0 16px calc(60px + var(--safe-bottom));
     padding-top: var(--safe-top);
   }
-
+ 
   body::before {
     content: '';
     position: fixed;
@@ -53,171 +262,94 @@
     pointer-events: none;
     z-index: 0;
   }
-
+ 
   .app { width: 100%; max-width: 480px; position: relative; z-index: 1; }
-
-  /* ── Header ────────────────────────────────────────────── */
+ 
+  /* ── Header ─────────────────────────────────────────────── */
   header { padding: 48px 0 32px; text-align: center; position: relative; }
   .wordmark {
     font-family: 'Instrument Serif', serif;
-    font-size: 13px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--accent);
-    opacity: 0.8;
+    font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--accent); opacity: 0.8;
   }
   .date-display {
     font-family: 'Instrument Serif', serif;
-    font-size: 28px;
-    color: var(--text);
-    margin-top: 6px;
-    opacity: 0.9;
+    font-size: 28px; color: var(--text); margin-top: 6px; opacity: 0.9;
   }
   .reset-btn {
-    position: absolute;
-    top: 52px; right: 0;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 11px;
-    font-family: 'DM Sans', sans-serif;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    padding: 6px 2px;
-    opacity: 0.6;
+    position: absolute; top: 52px; right: 0;
+    background: none; border: none; color: var(--muted);
+    font-size: 11px; font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; padding: 6px 2px; opacity: 0.6;
     transition: opacity 0.2s, color 0.2s;
   }
   .reset-btn:hover { opacity: 1; color: #e87a7a; }
-
-  /* ── Confirm overlay ───────────────────────────────────── */
+ 
+  /* ── Confirm overlay ─────────────────────────────────────── */
   .confirm-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(13,13,16,0.85);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 400;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    padding: 24px;
+    position: fixed; inset: 0;
+    background: rgba(13,13,16,0.88);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 400; padding: 24px;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
   }
   .confirm-overlay.show { opacity: 1; pointer-events: auto; }
   .confirm-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 28px 24px;
-    max-width: 320px;
-    width: 100%;
-    text-align: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px 24px;
+    max-width: 320px; width: 100%; text-align: center;
   }
-  .confirm-box h3 {
-    font-family: 'Instrument Serif', serif;
-    font-size: 20px;
-    margin-bottom: 8px;
-  }
-  .confirm-box p {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.5;
-    margin-bottom: 20px;
-  }
+  .confirm-box h3 { font-family: 'Instrument Serif', serif; font-size: 20px; margin-bottom: 8px; }
+  .confirm-box p { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
   .confirm-actions { display: flex; gap: 10px; }
   .confirm-yes {
-    flex: 1;
-    background: #e87a7a;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 12px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
+    flex: 1; background: #e87a7a; color: #fff;
+    border: none; border-radius: 10px; padding: 12px;
+    font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s;
   }
   .confirm-yes:hover { background: #d96a6a; }
   .confirm-no {
-    flex: 1;
-    background: var(--surface2);
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: background 0.2s;
+    flex: 1; background: var(--surface2); color: var(--muted);
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+    font-size: 13px; cursor: pointer; transition: background 0.2s;
   }
   .confirm-no:hover { background: var(--border); color: var(--text); }
-
-  /* ── Setup banner ──────────────────────────────────────── */
+ 
+  /* ── Setup banner ────────────────────────────────────────── */
   .setup-banner {
-    background: var(--surface);
-    border: 1px solid var(--accent);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 20px;
-    display: none;
+    background: var(--surface); border: 1px solid var(--accent);
+    border-radius: 16px; padding: 20px; margin-bottom: 20px; display: none;
   }
   .setup-banner.visible { display: block; }
-  .setup-title {
-    font-family: 'Instrument Serif', serif;
-    font-size: 18px;
-    margin-bottom: 6px;
-  }
-  .setup-body {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.5;
-    margin-bottom: 14px;
-  }
+  .setup-title { font-family: 'Instrument Serif', serif; font-size: 18px; margin-bottom: 6px; }
+  .setup-body { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
   .setup-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .setup-btn {
-    flex: 1;
-    min-width: 120px;
-    background: var(--accent);
-    color: #0d0d10;
-    border: none;
-    border-radius: 8px;
-    padding: 11px 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background 0.2s;
+    flex: 1; min-width: 120px;
+    background: var(--accent); color: #0d0d10;
+    border: none; border-radius: 8px; padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.2s;
   }
   .setup-btn:hover { background: #f0d88a; }
   .setup-btn.secondary {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
   }
   .setup-btn.secondary:hover { border-color: var(--muted); color: var(--text); background: transparent; }
-
-  /* ── Install prompt ────────────────────────────────────── */
+ 
+  /* ── Install bar ─────────────────────────────────────────── */
   .install-bar {
     position: fixed;
-    bottom: calc(16px + var(--safe-bottom));
-    left: 50%; transform: translateX(-50%);
-    background: var(--surface);
-    border: 1px solid var(--accent);
-    border-radius: 14px;
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    z-index: 200;
-    max-width: 440px;
-    width: calc(100% - 32px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    opacity: 0;
+    bottom: calc(16px + var(--safe-bottom)); left: 50%;
     transform: translateX(-50%) translateY(20px);
+    background: var(--surface); border: 1px solid var(--accent);
+    border-radius: 14px; padding: 14px 20px;
+    display: flex; align-items: center; gap: 14px;
+    z-index: 200; max-width: 440px; width: calc(100% - 32px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    opacity: 0; pointer-events: none;
     transition: opacity 0.4s, transform 0.4s;
-    pointer-events: none;
   }
   .install-bar.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
   .install-icon { font-size: 24px; flex-shrink: 0; }
@@ -225,48 +357,39 @@
   .install-text strong { display: block; font-size: 14px; margin-bottom: 2px; }
   .install-text span { font-size: 12px; color: var(--muted); }
   .install-action {
-    background: var(--accent);
-    color: #0d0d10;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
+    background: var(--accent); color: #0d0d10;
+    border: none; border-radius: 8px; padding: 8px 14px;
+    font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap;
   }
   .install-dismiss {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 18px;
-    cursor: pointer;
-    padding: 0 4px;
-    line-height: 1;
+    background: none; border: none; color: var(--muted);
+    font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1;
   }
-
-  /* ── Check-in cards ────────────────────────────────────── */
+ 
+  /* ── Check-in cards ──────────────────────────────────────── */
   .checkin-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px 28px;
-    margin-bottom: 12px;
-    transition: border-color 0.3s;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px 28px;
+    margin-bottom: 12px; transition: border-color 0.3s;
   }
   .checkin-card.active { border-color: var(--accent); }
-  .checkin-card.completed { opacity: 0.7; }
-
-  .period-row {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 20px;
-  }
+  .checkin-card.completed { opacity: 0.75; cursor: pointer; }
+  .checkin-card.editing { border-color: var(--accent); opacity: 1; }
+ 
+  .period-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
   .period-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .period-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
   .period-time { margin-left: auto; font-size: 12px; color: var(--muted); }
-  .period-check { margin-left: auto; font-size: 14px; color: var(--accent); }
-
-  /* ── Stars ─────────────────────────────────────────────── */
+  .period-check { font-size: 14px; color: var(--accent); }
+ 
+  .edit-hint {
+    margin-left: auto; font-size: 11px; color: var(--muted);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .checkin-card.completed:hover .edit-hint { opacity: 1; }
+ 
+  /* ── Stars ───────────────────────────────────────────────── */
   .star-section { margin-bottom: 20px; }
   .star-prompt { font-family: 'Instrument Serif', serif; font-size: 20px; color: var(--text); margin-bottom: 16px; line-height: 1.3; }
   .star-container { display: flex; gap: 6px; justify-content: center; user-select: none; }
@@ -275,127 +398,110 @@
   .star-wrapper:hover .star-svg { transform: scale(1.1); }
   .star-wrapper:active .star-svg { transform: scale(0.95); }
   .star-left, .star-right { position: absolute; top: 0; width: 50%; height: 100%; z-index: 2; }
-  .star-left { left: 0; }
-  .star-right { right: 0; }
-
+  .star-left { left: 0; } .star-right { right: 0; }
+ 
   .rating-display { text-align: center; margin-top: 10px; height: 20px; }
   .rating-number { font-family: 'Instrument Serif', serif; font-size: 16px; color: var(--accent); opacity: 0; transition: opacity 0.2s; }
   .rating-number.visible { opacity: 1; }
-
-  /* ── Word input ─────────────────────────────────────────── */
+ 
+  /* ── Word input ──────────────────────────────────────────── */
   .word-section { margin-top: 4px; }
   .word-label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: block; }
   .word-input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 13px 16px;
-    color: var(--text);
-    font-family: 'Instrument Serif', serif;
-    font-size: 18px;
-    outline: none;
-    transition: border-color 0.2s;
-    text-align: center;
-    letter-spacing: 0.05em;
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 13px 16px; color: var(--text);
+    font-family: 'Instrument Serif', serif; font-size: 18px;
+    outline: none; transition: border-color 0.2s; text-align: center; letter-spacing: 0.05em;
   }
   .word-input::placeholder { color: var(--muted); font-style: italic; }
   .word-input:focus { border-color: var(--accent); }
-
-  /* ── Submit ─────────────────────────────────────────────── */
+ 
+  /* ── Buttons ─────────────────────────────────────────────── */
   .submit-btn {
-    width: 100%;
-    background: var(--accent);
-    color: #0d0d10;
-    border: none;
-    border-radius: 10px;
-    padding: 14px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: background 0.2s, transform 0.1s;
+    width: 100%; background: var(--accent); color: #0d0d10;
+    border: none; border-radius: 10px; padding: 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+    margin-top: 20px; transition: background 0.2s, transform 0.1s;
   }
   .submit-btn:hover { background: #f0d88a; }
   .submit-btn:active { transform: scale(0.98); }
   .submit-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-
-  /* ── Completed state ────────────────────────────────────── */
+  .cancel-edit-btn {
+    width: 100%; background: none; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 10px; padding: 11px;
+    font-family: 'DM Sans', sans-serif; font-size: 12px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; margin-top: 8px; transition: border-color 0.2s, color 0.2s;
+  }
+  .cancel-edit-btn:hover { border-color: var(--muted); color: var(--text); }
+ 
+  /* ── Completed state ─────────────────────────────────────── */
   .completed-state { text-align: center; padding: 8px 0; }
   .completed-stars { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
   .completed-word { font-family: 'Instrument Serif', serif; font-size: 16px; color: var(--muted); font-style: italic; }
-
-  /* ── History ────────────────────────────────────────────── */
+ 
+  /* ── History ─────────────────────────────────────────────── */
   .section-title { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin: 32px 0 14px; padding: 0 4px; }
   .history-list { display: flex; flex-direction: column; gap: 8px; }
   .history-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 18px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 18px;
     display: flex; align-items: center; gap: 12px;
   }
   .history-date { font-size: 12px; color: var(--muted); min-width: 64px; }
-  .history-period { font-size: 11px; color: var(--muted); min-width: 48px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .history-period { font-size: 11px; min-width: 48px; text-transform: uppercase; letter-spacing: 0.1em; }
   .history-stars-mini { display: flex; gap: 2px; }
   .history-word { font-family: 'Instrument Serif', serif; font-size: 15px; color: var(--text); margin-left: auto; font-style: italic; }
-
-  /* ── Trend chart ────────────────────────────────────────── */
+ 
+  /* ── Chart ───────────────────────────────────────────────── */
   .trend-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-top: 12px; }
-  .trend-title { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
-  canvas { width: 100% !important; }
-
-  /* ── Avg pill ───────────────────────────────────────────── */
+  .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .trend-title { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+  .chart-tabs { display: flex; gap: 2px; background: var(--surface2); border-radius: 8px; padding: 3px; }
+  .chart-tab {
+    font-size: 11px; padding: 4px 10px; border-radius: 6px;
+    border: none; background: none; color: var(--muted);
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    transition: background 0.15s, color 0.15s;
+  }
+  .chart-tab.active { background: var(--border); color: var(--text); }
+  canvas { width: 100% !important; display: block; }
+ 
+  /* ── Avg pill ────────────────────────────────────────────── */
   .avg-pill {
-    display: none;
-    align-items: center;
-    gap: 6px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 5px 14px;
-    font-size: 12px;
-    color: var(--muted);
-    width: fit-content;
-    margin: 0 auto 28px;
+    display: none; align-items: center; gap: 6px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 100px; padding: 5px 14px;
+    font-size: 12px; color: var(--muted); width: fit-content; margin: 0 auto 28px;
   }
   .avg-pill span { color: var(--accent); font-family: 'Instrument Serif', serif; font-size: 15px; }
-
-  /* ── Toast ──────────────────────────────────────────────── */
+ 
+  /* ── Toast ───────────────────────────────────────────────── */
   .notif-banner {
-    position: fixed;
-    top: calc(16px + var(--safe-top));
-    left: 50%;
+    position: fixed; top: calc(16px + var(--safe-top)); left: 50%;
     transform: translateX(-50%) translateY(-80px);
-    background: var(--accent);
-    color: #0d0d10;
-    border-radius: 100px;
-    padding: 10px 20px;
-    font-size: 13px;
-    font-weight: 500;
-    z-index: 300;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    white-space: nowrap;
+    background: var(--accent); color: #0d0d10;
+    border-radius: 100px; padding: 10px 20px;
+    font-size: 13px; font-weight: 500; z-index: 300;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); white-space: nowrap;
   }
   .notif-banner.show { transform: translateX(-50%) translateY(0); }
-
+ 
   @keyframes starPop { 0%{transform:scale(1)} 40%{transform:scale(1.3)} 100%{transform:scale(1)} }
   .star-pop { animation: starPop 0.25s ease; }
 </style>
 </head>
 <body>
-
+ 
 <div class="app">
   <header>
     <div class="wordmark">Pulse</div>
     <div class="date-display" id="dateDisplay"></div>
     <button class="reset-btn" onclick="showConfirm()">Reset</button>
   </header>
-
-  <!-- Confirm reset overlay -->
+ 
   <div class="confirm-overlay" id="confirmOverlay">
     <div class="confirm-box">
       <h3>Clear all data?</h3>
@@ -406,8 +512,7 @@
       </div>
     </div>
   </div>
-
-  <!-- Setup nudge banner -->
+ 
   <div class="setup-banner" id="setupBanner">
     <div class="setup-title">Enable nudges ✦</div>
     <div class="setup-body">Allow notifications so Pulse can remind you to check in at 8 AM, 12:30 PM, and 9 PM — even when the app isn't open.</div>
@@ -416,22 +521,27 @@
       <button class="setup-btn secondary" onclick="dismissSetup()">Maybe later</button>
     </div>
   </div>
-
+ 
   <div id="avgPill" class="avg-pill"><span id="avgScore">—</span> avg today</div>
   <div id="cards"></div>
-
+ 
   <div id="historySection" style="display:none">
-    <div class="section-title">7-day trend</div>
+    <div class="section-title">Mood trend</div>
     <div class="trend-card">
-      <div class="trend-title">Daily mood average</div>
-      <canvas id="trendChart" height="80"></canvas>
+      <div class="chart-header">
+        <div class="trend-title" id="chartTitle">Daily average</div>
+        <div class="chart-tabs">
+          <button class="chart-tab active" id="tab-daily" onclick="switchChart('daily')">Daily</button>
+          <button class="chart-tab" id="tab-intraday" onclick="switchChart('intraday')">Today</button>
+        </div>
+      </div>
+      <canvas id="trendChart" height="100"></canvas>
     </div>
     <div class="section-title">Log</div>
     <div class="history-list" id="historyList"></div>
   </div>
 </div>
-
-<!-- Install prompt bar -->
+ 
 <div class="install-bar" id="installBar">
   <div class="install-icon">⭐</div>
   <div class="install-text">
@@ -441,50 +551,50 @@
   <button class="install-action" id="installBtn">Install</button>
   <button class="install-dismiss" onclick="dismissInstall()">✕</button>
 </div>
-
+ 
 <div class="notif-banner" id="notifBanner"></div>
-
+ 
 <script>
 // ─── Constants ────────────────────────────────────────────────────────────────
 const PERIODS = [
-  { id:'morning', label:'Morning', time:'8:00 AM',  color:'#f4a261', prompt:"How are you starting the day?",   hour:8,  min:0  },
-  { id:'midday',  label:'Mid-day', time:'12:30 PM', color:'#e8c97a', prompt:"How's the day going so far?",     hour:12, min:30 },
-  { id:'night',   label:'Night',   time:'9:00 PM',  color:'#8b9ec7', prompt:"How did today feel overall?",     hour:21, min:0  },
+  { id:'morning', label:'Morning', time:'8:00 AM',  color:'#f4a261', prompt:"How are you starting the day?",  hour:8,  min:0  },
+  { id:'midday',  label:'Mid-day', time:'12:30 PM', color:'#e8c97a', prompt:"How's the day going so far?",    hour:12, min:30 },
+  { id:'night',   label:'Night',   time:'9:00 PM',  color:'#8b9ec7', prompt:"How did today feel overall?",    hour:21, min:0  },
 ];
-
-// ─── Data helpers ─────────────────────────────────────────────────────────────
+ 
+// ─── Data ─────────────────────────────────────────────────────────────────────
 function todayKey() { return new Date().toISOString().slice(0,10); }
-function loadData() { try { return JSON.parse(localStorage.getItem('pulse_data') || '{}'); } catch { return {}; } }
+function loadData() { try { return JSON.parse(localStorage.getItem('pulse_data')||'{}'); } catch { return {}; } }
 function saveData(d) { localStorage.setItem('pulse_data', JSON.stringify(d)); }
 let data = loadData();
-
-// ─── Date header ──────────────────────────────────────────────────────────────
-document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-US', {
+let editingId = null;
+let activeChart = 'daily';
+let swReg = null;
+ 
+// ─── Date display ─────────────────────────────────────────────────────────────
+document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-US',{
   weekday:'long', month:'long', day:'numeric'
 });
-
-// ─── Service Worker registration ──────────────────────────────────────────────
-let swReg = null;
+ 
+// ─── Service Worker ───────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./service-worker.js').then(reg => {
-    swReg = reg;
-    console.log('[Pulse] SW registered', reg.scope);
-  }).catch(err => console.warn('[Pulse] SW registration failed', err));
+  navigator.serviceWorker.register('./service-worker.js')
+    .then(r => { swReg = r; })
+    .catch(e => console.warn('[Pulse] SW failed', e));
 }
-
-// ─── PWA Install prompt ───────────────────────────────────────────────────────
+ 
+// ─── Install prompt ───────────────────────────────────────────────────────────
 let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  if (!localStorage.getItem('pulse_install_dismissed')) {
+  if (!localStorage.getItem('pulse_install_dismissed'))
     setTimeout(() => document.getElementById('installBar').classList.add('show'), 2000);
-  }
 });
 window.addEventListener('appinstalled', () => {
   document.getElementById('installBar').classList.remove('show');
   showToast('Pulse installed ✓');
-  localStorage.setItem('pulse_install_dismissed', '1');
+  localStorage.setItem('pulse_install_dismissed','1');
 });
 document.getElementById('installBtn').addEventListener('click', async () => {
   if (!deferredInstallPrompt) return;
@@ -496,63 +606,53 @@ document.getElementById('installBtn').addEventListener('click', async () => {
 });
 function dismissInstall() {
   document.getElementById('installBar').classList.remove('show');
-  localStorage.setItem('pulse_install_dismissed', '1');
+  localStorage.setItem('pulse_install_dismissed','1');
 }
-
-// ─── Notification permission & setup banner ───────────────────────────────────
+ 
+// ─── Notifications ────────────────────────────────────────────────────────────
+// Decoupled from data: banner reappears only if permission is not yet granted,
+// regardless of whether the user has cleared their mood data.
 function checkSetupBanner() {
-  const banner = document.getElementById('setupBanner');
   if (!('Notification' in window)) return;
-  if (Notification.permission === 'default' && !localStorage.getItem('pulse_notif_dismissed')) {
-    banner.classList.add('visible');
-  }
+  const granted = Notification.permission === 'granted';
+  const dismissed = !!localStorage.getItem('pulse_notif_dismissed');
+  const banner = document.getElementById('setupBanner');
+  if (!granted && !dismissed) banner.classList.add('visible');
+  else banner.classList.remove('visible');
 }
 async function requestNotifPermission() {
   const perm = await Notification.requestPermission();
+  localStorage.setItem('pulse_notif_dismissed','1');
   document.getElementById('setupBanner').classList.remove('visible');
-  if (perm === 'granted') {
-    showToast('Nudges enabled ✓');
-    scheduleNudges();
-  } else {
-    showToast('Notifications blocked — check browser settings');
-  }
-  localStorage.setItem('pulse_notif_dismissed', '1');
+  if (perm === 'granted') { showToast('Nudges enabled ✓'); scheduleNudges(); }
+  else showToast('Notifications blocked — check browser settings');
 }
 function dismissSetup() {
   document.getElementById('setupBanner').classList.remove('visible');
-  localStorage.setItem('pulse_notif_dismissed', '1');
+  localStorage.setItem('pulse_notif_dismissed','1');
 }
-
-// ─── Nudge scheduling ─────────────────────────────────────────────────────────
-// Uses Web Notifications + setTimeout for same-session delivery.
-// For true background delivery, a push server is needed; this gives
-// "tab open" nudges plus native notifications when permission is granted.
 function scheduleNudges() {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   const now = new Date();
   const today = data[todayKey()] || {};
-
   PERIODS.forEach(p => {
     const target = new Date(now);
     target.setHours(p.hour, p.min, 0, 0);
     const diff = target - now;
     if (diff > 0 && !today[p.id]) {
       setTimeout(() => {
-        const current = data[todayKey()] || {};
-        if (current[p.id]) return; // already done
+        if ((data[todayKey()]||{})[p.id]) return;
         new Notification('Pulse', {
           body: `Time for your ${p.label.toLowerCase()} check-in 🌟`,
-          icon: './icon-192.svg',
-          tag: `pulse-${p.id}`,
-          requireInteraction: false
+          icon: './icon-192.svg', tag: `pulse-${p.id}`,
         });
         showToast(`${p.label} check-in time`);
       }, diff);
     }
   });
 }
-
-// ─── Star helpers ─────────────────────────────────────────────────────────────
+ 
+// ─── Stars ────────────────────────────────────────────────────────────────────
 function renderStarSvg(value, starIndex, color) {
   const fillPct = Math.min(100, Math.max(0, (value - starIndex) * 100));
   const uid = `c${starIndex}-${Math.random().toString(36).slice(2,7)}`;
@@ -562,7 +662,7 @@ function renderStarSvg(value, starIndex, color) {
     <polygon points="22,4 27.5,17 42,18 31,28 34.5,42 22,35 9.5,42 13,28 2,18 16.5,17" fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" clip-path="url(#${uid})"/>
   </svg>`;
 }
-
+ 
 function renderStars(cardId, currentVal, color) {
   let html = `<div class="star-container" id="stars-${cardId}">`;
   for (let i=0; i<5; i++) {
@@ -572,13 +672,13 @@ function renderStars(cardId, currentVal, color) {
       onclick="onStarClick('${cardId}',${i},event,this)"
       ontouchmove="onStarTouch('${cardId}',${i},event)"
       ontouchend="onStarTouchEnd('${cardId}',${i},event)">
-      ${renderStarSvg(currentVal||0, i, color)}
+      ${renderStarSvg(currentVal||0,i,color)}
       <div class="star-left"></div><div class="star-right"></div>
     </div>`;
   }
   return html + `</div>`;
 }
-
+ 
 function getVal(starIndex, event, el) {
   const rect = el.getBoundingClientRect();
   const x = (event.clientX ?? event.touches?.[0]?.clientX ?? rect.left + rect.width/2) - rect.left;
@@ -588,68 +688,67 @@ function getVal(starIndex, event, el) {
   if (pct < 0.75) return starIndex + 0.75;
   return starIndex + 1;
 }
-
+ 
 function updateStarsDisplay(cardId, val, color) {
   const c = document.getElementById(`stars-${cardId}`);
   if (!c) return;
   c.querySelectorAll('.star-wrapper').forEach((w,i) => {
-    w.innerHTML = renderStarSvg(val, i, color) + '<div class="star-left"></div><div class="star-right"></div>';
+    w.innerHTML = renderStarSvg(val,i,color)+'<div class="star-left"></div><div class="star-right"></div>';
   });
 }
-
+ 
 function showRating(cardId, val) {
   const el = document.getElementById(`rating-display-${cardId}`);
   if (!el) return;
   el.textContent = (+val).toFixed(2).replace(/\.?0+$/,'') + ' / 5';
   el.classList.add('visible');
 }
-
-function onStarHover(id, i, ev, el) {
-  const v = getVal(i, ev, el);
-  updateStarsDisplay(id, v, getPColor(id));
-  showRating(id, v);
+ 
+function onStarHover(id,i,ev,el) {
+  const v = getVal(i,ev,el);
+  updateStarsDisplay(id,v,getPColor(id)); showRating(id,v);
 }
 function onStarLeave(id) {
-  const saved = getSavedRating(id);
-  updateStarsDisplay(id, saved, getPColor(id));
+  const saved = getPendingOrSaved(id);
+  updateStarsDisplay(id,saved,getPColor(id));
   const el = document.getElementById(`rating-display-${id}`);
   if (el && !saved) el.classList.remove('visible');
 }
-function onStarClick(id, i, ev, el) {
+function onStarClick(id,i,ev,el) {
   ev.preventDefault();
-  const v = getVal(i, ev, el);
-  setRating(id, v);
+  const v = getVal(i,ev,el);
+  setRating(id,v);
   el.querySelector('.star-svg')?.classList.remove('star-pop');
   void el.querySelector('.star-svg')?.offsetWidth;
   el.querySelector('.star-svg')?.classList.add('star-pop');
+  if (navigator.vibrate) navigator.vibrate(8);
 }
-function onStarTouch(id, i, ev) {
+function onStarTouch(id,i,ev) {
   ev.preventDefault();
   const touch = ev.touches[0];
   const el = ev.currentTarget;
-  const v = getVal(i, { clientX: touch.clientX }, el);
-  updateStarsDisplay(id, v, getPColor(id));
-  showRating(id, v);
+  const v = getVal(i,{clientX:touch.clientX},el);
+  updateStarsDisplay(id,v,getPColor(id)); showRating(id,v);
   el.dataset.touchVal = v;
 }
-function onStarTouchEnd(id, i, ev) {
+function onStarTouchEnd(id,i,ev) {
   const el = ev.currentTarget;
-  const v = parseFloat(el.dataset.touchVal || getVal(i, {clientX: el.getBoundingClientRect().left + el.offsetWidth*0.75}, el));
-  setRating(id, v);
+  const v = parseFloat(el.dataset.touchVal||getVal(i,{clientX:el.getBoundingClientRect().left+el.offsetWidth*0.75},el));
+  setRating(id,v);
+  if (navigator.vibrate) navigator.vibrate(8);
 }
-
-function setRating(id, v) {
+function setRating(id,v) {
   const btn = document.getElementById(`submit-${id}`);
   if (btn) btn.dataset.rating = v;
-  updateStarsDisplay(id, v, getPColor(id));
-  showRating(id, v);
-  checkSubmit(id);
+  updateStarsDisplay(id,v,getPColor(id)); showRating(id,v); checkSubmit(id);
 }
-function getSavedRating(id) {
-  const today = data[todayKey()] || {};
-  return today[id]?.rating || 0;
+function getPendingOrSaved(id) {
+  const btn = document.getElementById(`submit-${id}`);
+  const pending = btn ? parseFloat(btn.dataset.rating||0) : 0;
+  if (pending > 0) return pending;
+  return (data[todayKey()]||{})[id]?.rating || 0;
 }
-function getPColor(id) { return PERIODS.find(p=>p.id===id)?.color || '#e8c97a'; }
+function getPColor(id) { return PERIODS.find(p=>p.id===id)?.color||'#e8c97a'; }
 function checkSubmit(id) {
   const btn = document.getElementById(`submit-${id}`);
   if (!btn) return;
@@ -657,62 +756,89 @@ function checkSubmit(id) {
   const word = document.getElementById(`word-${id}`)?.value?.trim();
   btn.disabled = !(hasR && word);
 }
-
-// ─── Render cards ─────────────────────────────────────────────────────────────
+ 
+// ─── Cards ────────────────────────────────────────────────────────────────────
 function renderCards() {
   const today = data[todayKey()] || {};
   const container = document.getElementById('cards');
   container.innerHTML = '';
-
+ 
   PERIODS.forEach(p => {
     const entry = today[p.id];
+    const isEditing = editingId === p.id;
     const card = document.createElement('div');
-    card.className = 'checkin-card ' + (entry ? 'completed' : 'active');
-
-    if (entry) {
+ 
+    if (entry && !isEditing) {
+      // ── Completed — tap anywhere to edit ──
+      card.className = 'checkin-card completed';
+      card.onclick = () => startEdit(p.id);
       card.innerHTML = `
         <div class="period-row">
           <div class="period-dot" style="background:${p.color}"></div>
           <div class="period-label">${p.label}</div>
+          <div class="edit-hint">Edit</div>
           <div class="period-check">✓ ${entry.rating} ★</div>
         </div>
         <div class="completed-state">
-          <div class="completed-stars">${miniStars(entry.rating, p.color)}</div>
+          <div class="completed-stars">${miniStars(entry.rating,p.color)}</div>
           <div class="completed-word">${entry.word}</div>
         </div>`;
     } else {
+      // ── Input form (new entry or editing) ──
+      card.className = 'checkin-card ' + (isEditing ? 'editing' : 'active');
+      const prefillRating = isEditing ? (entry?.rating||0) : 0;
+      const prefillWord   = isEditing ? (entry?.word||'')  : '';
       card.innerHTML = `
         <div class="period-row">
           <div class="period-dot" style="background:${p.color}"></div>
           <div class="period-label">${p.label}</div>
-          <div class="period-time">${p.time}</div>
+          <div class="period-time">${isEditing ? 'Editing' : p.time}</div>
         </div>
         <div class="star-section">
           <div class="star-prompt">${p.prompt}</div>
-          ${renderStars(p.id, 0, p.color)}
-          <div class="rating-display"><div class="rating-number" id="rating-display-${p.id}"></div></div>
+          ${renderStars(p.id, prefillRating, p.color)}
+          <div class="rating-display">
+            <div class="rating-number ${prefillRating?'visible':''}" id="rating-display-${p.id}">
+              ${prefillRating ? prefillRating+' / 5' : ''}
+            </div>
+          </div>
         </div>
         <div class="word-section">
           <label class="word-label" for="word-${p.id}">One word</label>
           <input class="word-input" id="word-${p.id}" type="text"
-            placeholder="calm, anxious, bright…" maxlength="24" autocomplete="off" autocorrect="off"
+            placeholder="calm, anxious, bright…" maxlength="24"
+            autocomplete="off" autocorrect="off" value="${prefillWord}"
             oninput="handleWord('${p.id}',this)">
         </div>
-        <button class="submit-btn" id="submit-${p.id}" data-rating="0" disabled
-          onclick="submit('${p.id}')">Save check-in</button>`;
+        <button class="submit-btn" id="submit-${p.id}"
+          data-rating="${prefillRating}"
+          ${prefillRating && prefillWord ? '' : 'disabled'}
+          onclick="submitEntry('${p.id}')">
+          ${isEditing ? 'Update check-in' : 'Save check-in'}
+        </button>
+        ${isEditing ? `<button class="cancel-edit-btn" onclick="cancelEdit()">Cancel</button>` : ''}`;
     }
     container.appendChild(card);
   });
-
+ 
   updatePill();
   renderHistory();
 }
-
+ 
+function startEdit(id) {
+  editingId = id;
+  renderCards();
+  setTimeout(() => {
+    document.querySelector('.checkin-card.editing')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }, 50);
+}
+function cancelEdit() { editingId = null; renderCards(); }
+ 
 function miniStars(val, color) {
   let h = '';
   for (let i=0; i<5; i++) {
     const uid = `m${i}-${Math.random().toString(36).slice(2,6)}`;
-    const fp = Math.min(100, Math.max(0, (val-i)*100));
+    const fp = Math.min(100,Math.max(0,(val-i)*100));
     h += `<svg width="14" height="14" viewBox="0 0 44 44">
       <defs><clipPath id="${uid}"><rect x="0" y="0" width="${(fp*0.44).toFixed(2)}" height="44"/></clipPath></defs>
       <polygon points="22,4 27.5,17 42,18 31,28 34.5,42 22,35 9.5,42 13,28 2,18 16.5,17" fill="#2a2a35" stroke="#2a2a35" stroke-width="2"/>
@@ -721,159 +847,225 @@ function miniStars(val, color) {
   }
   return h;
 }
-
-function handleWord(id, input) {
-  input.value = input.value.replace(/\s+/g,'');
-  checkSubmit(id);
-}
-
-function submit(id) {
+function handleWord(id, input) { input.value = input.value.replace(/\s+/g,''); checkSubmit(id); }
+ 
+function submitEntry(id) {
   const btn = document.getElementById(`submit-${id}`);
   const rating = parseFloat(btn.dataset.rating);
   const word = document.getElementById(`word-${id}`).value.trim();
   if (!rating || !word) return;
-
   const key = todayKey();
   if (!data[key]) data[key] = {};
+  const isEdit = !!data[key][id];
   data[key][id] = { rating, word, time: new Date().toISOString() };
   saveData(data);
-  showToast(`${PERIODS.find(p=>p.id===id).label} saved ✓`);
+  editingId = null;
+  showToast(isEdit ? `${PERIODS.find(p=>p.id===id).label} updated ✓` : `${PERIODS.find(p=>p.id===id).label} saved ✓`);
   renderCards();
 }
-
-// ─── Pill ─────────────────────────────────────────────────────────────────────
+ 
+// ─── Avg pill ─────────────────────────────────────────────────────────────────
 function updatePill() {
-  const entries = Object.values(data[todayKey()] || {});
+  const entries = Object.values(data[todayKey()]||{});
   const pill = document.getElementById('avgPill');
-  if (!entries.length) { pill.style.display = 'none'; return; }
-  const avg = entries.reduce((s,e) => s+e.rating, 0) / entries.length;
-  document.getElementById('avgScore').textContent = avg.toFixed(1) + ' / 5';
+  if (!entries.length) { pill.style.display='none'; return; }
+  const avg = entries.reduce((s,e)=>s+e.rating,0)/entries.length;
+  document.getElementById('avgScore').textContent = avg.toFixed(1)+' / 5';
   pill.style.display = 'flex';
 }
-
+ 
 // ─── History ──────────────────────────────────────────────────────────────────
 function renderHistory() {
   const allKeys = Object.keys(data).sort().reverse();
   const section = document.getElementById('historySection');
   const list = document.getElementById('historyList');
-  const pastDays = allKeys.filter(k => k !== todayKey() && Object.keys(data[k]).length > 0);
-  const todayHas = Object.keys(data[todayKey()]||{}).length > 0;
-  if (!todayHas && !pastDays.length) { section.style.display='none'; return; }
-  section.style.display = 'block';
-
-  list.innerHTML = '';
-  allKeys.slice(0,7).forEach(dk => {
-    const dd = data[dk];
-    const label = new Date(dk+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    PERIODS.forEach(p => {
-      const e = dd[p.id]; if (!e) return;
-      const item = document.createElement('div');
-      item.className = 'history-item';
-      item.innerHTML = `
+  const todayHas = Object.keys(data[todayKey()]||{}).length>0;
+  const pastHas = allKeys.some(k=>k!==todayKey()&&Object.keys(data[k]).length>0);
+  if (!todayHas && !pastHas) { section.style.display='none'; return; }
+  section.style.display='block';
+ 
+  list.innerHTML='';
+  allKeys.slice(0,7).forEach(dk=>{
+    const dd=data[dk];
+    const label=new Date(dk+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    PERIODS.forEach(p=>{
+      const e=dd[p.id]; if(!e) return;
+      const item=document.createElement('div');
+      item.className='history-item';
+      item.innerHTML=`
         <div class="history-date">${label}</div>
         <div class="history-period" style="color:${p.color}">${p.label.slice(0,3)}</div>
-        <div class="history-stars-mini">${miniStars(e.rating, p.color)}</div>
+        <div class="history-stars-mini">${miniStars(e.rating,p.color)}</div>
         <div class="history-word">${e.word}</div>`;
       list.appendChild(item);
     });
   });
-
-  drawChart(allKeys.slice(0,7));
+ 
+  activeChart==='daily' ? drawDailyChart(allKeys.slice(0,7)) : drawIntradayChart();
 }
-
-function drawChart(days) {
-  const canvas = document.getElementById('trendChart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  const W = canvas.parentElement.clientWidth - 40;
-  const H = 80;
-  canvas.width = W*dpr; canvas.height = H*dpr;
-  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+ 
+function switchChart(mode) {
+  activeChart=mode;
+  document.getElementById('tab-daily').classList.toggle('active',mode==='daily');
+  document.getElementById('tab-intraday').classList.toggle('active',mode==='intraday');
+  document.getElementById('chartTitle').textContent=mode==='daily'?'Daily average':"Today's arc";
+  const allKeys=Object.keys(data).sort().reverse();
+  mode==='daily' ? drawDailyChart(allKeys.slice(0,7)) : drawIntradayChart();
+}
+ 
+// Chart helpers
+function getCanvas() {
+  const canvas=document.getElementById('trendChart');
+  if(!canvas) return null;
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.parentElement.clientWidth-40;
+  const H=100;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
   ctx.scale(dpr,dpr);
-
-  const pts = days.slice().reverse().map(k => {
-    const e = Object.values(data[k]);
-    return e.length ? e.reduce((s,x)=>s+x.rating,0)/e.length : null;
-  }).filter(v=>v!==null);
-
-  if (pts.length < 2) return;
-  ctx.clearRect(0,0,W,H);
-
-  ctx.strokeStyle = '#2a2a35'; ctx.lineWidth = 0.5;
-  [1,2,3,4,5].forEach(v => {
-    const y = H - ((v/5)*(H-16)) - 4;
+  return {ctx,W,H};
+}
+function drawGridLines(ctx,W,H) {
+  ctx.strokeStyle='#2a2a35'; ctx.lineWidth=0.5;
+  [1,2,3,4,5].forEach(v=>{
+    const y=H-((v/5)*(H-20))-6;
     ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    ctx.fillStyle='#2a2a3588'; ctx.font='9px DM Sans,sans-serif'; ctx.textAlign='left';
+    ctx.fillText(v,2,y-2);
   });
-
-  const step = W/(pts.length-1);
-  const toY = v => H - ((v/5)*(H-16)) - 4;
-
+}
+function drawEmptyState(ctx,W,H,msg) {
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#2a2a35'; ctx.font='12px DM Sans,sans-serif'; ctx.textAlign='center';
+  ctx.fillText(msg,W/2,H/2+4);
+}
+ 
+// Daily average chart
+function drawDailyChart(days) {
+  const r=getCanvas(); if(!r) return;
+  const {ctx,W,H}=r;
+  const pts=days.slice().reverse().map(k=>{
+    const e=Object.values(data[k]);
+    return e.length?e.reduce((s,x)=>s+x.rating,0)/e.length:null;
+  }).filter(v=>v!==null);
+  if(pts.length<2){drawEmptyState(ctx,W,H,'Not enough data yet');return;}
+  ctx.clearRect(0,0,W,H);
+  drawGridLines(ctx,W,H);
+  const step=W/(pts.length-1);
+  const toY=v=>H-((v/5)*(H-20))-6;
   ctx.beginPath();
-  pts.forEach((v,i) => i===0 ? ctx.moveTo(0,toY(v)) : ctx.lineTo(i*step,toY(v)));
-  ctx.strokeStyle = '#e8c97a'; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
-
-  const grad = ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0,'rgba(232,201,122,0.25)');
-  grad.addColorStop(1,'rgba(232,201,122,0)');
+  pts.forEach((v,i)=>i===0?ctx.moveTo(0,toY(v)):ctx.lineTo(i*step,toY(v)));
+  ctx.strokeStyle='#e8c97a'; ctx.lineWidth=2; ctx.lineJoin='round'; ctx.stroke();
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(232,201,122,0.2)'); grad.addColorStop(1,'rgba(232,201,122,0)');
   ctx.lineTo((pts.length-1)*step,H); ctx.lineTo(0,H);
-  ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
-
-  pts.forEach((v,i) => {
-    ctx.beginPath(); ctx.arc(i*step,toY(v),3,0,Math.PI*2);
+  ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+  pts.forEach((v,i)=>{
+    ctx.beginPath(); ctx.arc(i*step,toY(v),3.5,0,Math.PI*2);
     ctx.fillStyle='#e8c97a'; ctx.fill();
   });
 }
-
+ 
+// Intraday chart — shows today's three check-ins as separate colored nodes
+function drawIntradayChart() {
+  const r=getCanvas(); if(!r) return;
+  const {ctx,W,H}=r;
+  const today=data[todayKey()]||{};
+  const entries=PERIODS.map(p=>({p,e:today[p.id]})).filter(x=>x.e);
+  if(!entries.length){drawEmptyState(ctx,W,H,'No check-ins yet today');return;}
+  ctx.clearRect(0,0,W,H);
+  drawGridLines(ctx,W,H);
+ 
+  const toY=v=>H-((v/5)*(H-24))-10;
+  const xPos={morning:W*0.15, midday:W*0.5, night:W*0.85};
+ 
+  // Dashed connector between completed entries
+  if(entries.length>1){
+    ctx.beginPath();
+    entries.forEach(({p,e},i)=>{
+      const x=xPos[p.id],y=toY(e.rating);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle='rgba(240,239,232,0.12)'; ctx.lineWidth=1.5;
+    ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
+  }
+ 
+  // Draw each period
+  PERIODS.forEach(p=>{
+    const x=xPos[p.id];
+    const e=today[p.id];
+    // Period label at bottom
+    ctx.fillStyle='#6b6b7a'; ctx.font='9px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(p.label.toUpperCase(),x,H-1);
+ 
+    if(e){
+      const y=toY(e.rating);
+      // Glow halo
+      ctx.beginPath(); ctx.arc(x,y,10,0,Math.PI*2);
+      ctx.fillStyle=p.color+'1a'; ctx.fill();
+      // Dot
+      ctx.beginPath(); ctx.arc(x,y,5.5,0,Math.PI*2);
+      ctx.fillStyle=p.color; ctx.fill();
+      // Rating value above dot
+      ctx.fillStyle=p.color; ctx.font='bold 11px DM Sans,sans-serif'; ctx.textAlign='center';
+      ctx.fillText(e.rating,x,y-11);
+      // Word below dot
+      ctx.fillStyle='#6b6b7a'; ctx.font='italic 10px Georgia,serif'; ctx.textAlign='center';
+      ctx.fillText(e.word,x,y+17);
+    } else {
+      // Empty ring for pending periods
+      ctx.beginPath(); ctx.arc(x,H/2,4,0,Math.PI*2);
+      ctx.fillStyle='#1e1e24'; ctx.fill();
+      ctx.strokeStyle=p.color+'44'; ctx.lineWidth=1.5; ctx.stroke();
+    }
+  });
+}
+ 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 function showToast(msg) {
-  const el = document.getElementById('notifBanner');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
+  const el=document.getElementById('notifBanner');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
 }
-
+ 
+// ─── Reset ────────────────────────────────────────────────────────────────────
+function showConfirm() { document.getElementById('confirmOverlay').classList.add('show'); }
+function hideConfirm() { document.getElementById('confirmOverlay').classList.remove('show'); }
+function clearAllData() {
+  localStorage.removeItem('pulse_data');
+  // Intentionally preserve pulse_notif_dismissed — notification preference
+  // is independent of mood data and should not reset when data is cleared.
+  data={}; editingId=null;
+  hideConfirm(); showToast('All data cleared');
+  renderCards();
+  // Re-check banner only if permission is genuinely unresolved
+  checkSetupBanner();
+}
+ 
 // ─── Demo seed ────────────────────────────────────────────────────────────────
 function seedDemo() {
-  if (Object.keys(loadData()).length > 0) return;
-  const words = [
+  if(Object.keys(loadData()).length>0) return;
+  const words=[
     ['focused','steady','tired'],['groggy','clear','peaceful'],
     ['energized','okay','drained'],['hopeful','content','restless'],
     ['calm','bright','satisfied'],['anxious','grounded','grateful'],
   ];
-  [-6,-5,-4,-3,-2,-1].forEach((offset,idx) => {
-    const d = new Date(); d.setDate(d.getDate()+offset);
-    const key = d.toISOString().slice(0,10);
-    data[key] = {};
-    const base = 2.5 + Math.sin(idx)*1.2;
-    PERIODS.forEach((p,pi) => {
-      data[key][p.id] = {
-        rating: Math.round(Math.max(1,Math.min(5,base+(Math.random()-0.5)))*4)/4,
-        word: words[idx][pi],
-        time: new Date(key).toISOString()
+  [-6,-5,-4,-3,-2,-1].forEach((offset,idx)=>{
+    const d=new Date(); d.setDate(d.getDate()+offset);
+    const key=d.toISOString().slice(0,10);
+    data[key]={};
+    const base=2.5+Math.sin(idx)*1.2;
+    PERIODS.forEach((p,pi)=>{
+      data[key][p.id]={
+        rating:Math.round(Math.max(1,Math.min(5,base+(Math.random()-0.5)))*4)/4,
+        word:words[idx][pi], time:new Date(key).toISOString()
       };
     });
   });
   saveData(data);
 }
-
-// ─── Reset ────────────────────────────────────────────────────────────────────
-function showConfirm() {
-  document.getElementById('confirmOverlay').classList.add('show');
-}
-function hideConfirm() {
-  document.getElementById('confirmOverlay').classList.remove('show');
-}
-function clearAllData() {
-  localStorage.removeItem('pulse_data');
-  localStorage.removeItem('pulse_notif_dismissed');
-  data = {};
-  hideConfirm();
-  showToast('All data cleared');
-  renderCards();
-  checkSetupBanner();
-}
-
+ 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 seedDemo();
 renderCards();
@@ -882,3 +1074,4 @@ scheduleNudges();
 </script>
 </body>
 </html>
+ 
