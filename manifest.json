@@ -1,0 +1,24 @@
+{
+  "name": "Pulse — Mood Tracker",
+  "short_name": "Pulse",
+  "description": "A gentle daily mood tracker with 3 check-ins per day",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d0d10",
+  "theme_color": "#0d0d10",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

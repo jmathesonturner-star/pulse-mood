@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d0d10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pulse">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<title>Pulse — Mood Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d10;
+    --surface: #16161a;
+    --surface2: #1e1e24;
+    --border: #2a2a35;
+    --text: #f0efe8;
+    --muted: #6b6b7a;
+    --accent: #e8c97a;
+    --accent2: #c4a85a;
+    --morning: #f4a261;
+    --midday: #e8c97a;
+    --night: #8b9ec7;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px calc(60px + var(--safe-bottom));
+    padding-top: var(--safe-top);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse, rgba(232,201,122,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { width: 100%; max-width: 480px; position: relative; z-index: 1; }
+
+  /* ── Header ────────────────────────────────────────────── */
+  header { padding: 48px 0 32px; text-align: center; }
+  .wordmark {
+    font-family: 'Instrument Serif', serif;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.8;
+  }
+  .date-display {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    color: var(--text);
+    margin-top: 6px;
+    opacity: 0.9;
+  }
+
+  /* ── Setup banner ──────────────────────────────────────── */
+  .setup-banner {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .setup-banner.visible { display: block; }
+  .setup-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+  .setup-body {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .setup-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .setup-btn {
+    flex: 1;
+    min-width: 120px;
+    background: var(--accent);
+    color: #0d0d10;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .setup-btn:hover { background: #f0d88a; }
+  .setup-btn.secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .setup-btn.secondary:hover { border-color: var(--muted); color: var(--text); background: transparent; }
+
+  /* ── Install prompt ────────────────────────────────────── */
+  .install-bar {
+    position: fixed;
+    bottom: calc(16px + var(--safe-bottom));
+    left: 50%; transform: translateX(-50%);
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 14px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 200;
+    max-width: 440px;
+    width: calc(100% - 32px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+    transition: opacity 0.4s, transform 0.4s;
+    pointer-events: none;
+  }
+  .install-bar.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .install-icon { font-size: 24px; flex-shrink: 0; }
+  .install-text { flex: 1; }
+  .install-text strong { display: block; font-size: 14px; margin-bottom: 2px; }
+  .install-text span { font-size: 12px; color: var(--muted); }
+  .install-action {
+    background: var(--accent);
+    color: #0d0d10;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .install-dismiss {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+  }
+
+  /* ── Check-in cards ────────────────────────────────────── */
+  .checkin-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    margin-bottom: 12px;
+    transition: border-color 0.3s;
+  }
+  .checkin-card.active { border-color: var(--accent); }
+  .checkin-card.completed { opacity: 0.7; }
+
+  .period-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px;
+  }
+  .period-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .period-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  .period-time { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .period-check { margin-left: auto; font-size: 14px; color: var(--accent); }
+
+  /* ── Stars ─────────────────────────────────────────────── */
+  .star-section { margin-bottom: 20px; }
+  .star-prompt { font-family: 'Instrument Serif', serif; font-size: 20px; color: var(--text); margin-bottom: 16px; line-height: 1.3; }
+  .star-container { display: flex; gap: 6px; justify-content: center; user-select: none; }
+  .star-wrapper { position: relative; width: 44px; height: 44px; cursor: pointer; }
+  .star-svg { width: 44px; height: 44px; position: absolute; top: 0; left: 0; transition: transform 0.15s ease; }
+  .star-wrapper:hover .star-svg { transform: scale(1.1); }
+  .star-wrapper:active .star-svg { transform: scale(0.95); }
+  .star-left, .star-right { position: absolute; top: 0; width: 50%; height: 100%; z-index: 2; }
+  .star-left { left: 0; }
+  .star-right { right: 0; }
+
+  .rating-display { text-align: center; margin-top: 10px; height: 20px; }
+  .rating-number { font-family: 'Instrument Serif', serif; font-size: 16px; color: var(--accent); opacity: 0; transition: opacity 0.2s; }
+  .rating-number.visible { opacity: 1; }
+
+  /* ── Word input ─────────────────────────────────────────── */
+  .word-section { margin-top: 4px; }
+  .word-label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: block; }
+  .word-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 16px;
+    color: var(--text);
+    font-family: 'Instrument Serif', serif;
+    font-size: 18px;
+    outline: none;
+    transition: border-color 0.2s;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+  .word-input::placeholder { color: var(--muted); font-style: italic; }
+  .word-input:focus { border-color: var(--accent); }
+
+  /* ── Submit ─────────────────────────────────────────────── */
+  .submit-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #0d0d10;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .submit-btn:hover { background: #f0d88a; }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── Completed state ────────────────────────────────────── */
+  .completed-state { text-align: center; padding: 8px 0; }
+  .completed-stars { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
+  .completed-word { font-family: 'Instrument Serif', serif; font-size: 16px; color: var(--muted); font-style: italic; }
+
+  /* ── History ────────────────────────────────────────────── */
+  .section-title { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin: 32px 0 14px; padding: 0 4px; }
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .history-date { font-size: 12px; color: var(--muted); min-width: 64px; }
+  .history-period { font-size: 11px; color: var(--muted); min-width: 48px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .history-stars-mini { display: flex; gap: 2px; }
+  .history-word { font-family: 'Instrument Serif', serif; font-size: 15px; color: var(--text); margin-left: auto; font-style: italic; }
+
+  /* ── Trend chart ────────────────────────────────────────── */
+  .trend-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-top: 12px; }
+  .trend-title { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+  canvas { width: 100% !important; }
+
+  /* ── Avg pill ───────────────────────────────────────────── */
+  .avg-pill {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    width: fit-content;
+    margin: 0 auto 28px;
+  }
+  .avg-pill span { color: var(--accent); font-family: 'Instrument Serif', serif; font-size: 15px; }
+
+  /* ── Toast ──────────────────────────────────────────────── */
+  .notif-banner {
+    position: fixed;
+    top: calc(16px + var(--safe-top));
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: var(--accent);
+    color: #0d0d10;
+    border-radius: 100px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 300;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+  }
+  .notif-banner.show { transform: translateX(-50%) translateY(0); }
+
+  @keyframes starPop { 0%{transform:scale(1)} 40%{transform:scale(1.3)} 100%{transform:scale(1)} }
+  .star-pop { animation: starPop 0.25s ease; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="wordmark">Pulse</div>
+    <div class="date-display" id="dateDisplay"></div>
+  </header>
+
+  <!-- Setup nudge banner -->
+  <div class="setup-banner" id="setupBanner">
+    <div class="setup-title">Enable nudges ✦</div>
+    <div class="setup-body">Allow notifications so Pulse can remind you to check in at 8 AM, 12:30 PM, and 9 PM — even when the app isn't open.</div>
+    <div class="setup-actions">
+      <button class="setup-btn" onclick="requestNotifPermission()">Enable notifications</button>
+      <button class="setup-btn secondary" onclick="dismissSetup()">Maybe later</button>
+    </div>
+  </div>
+
+  <div id="avgPill" class="avg-pill"><span id="avgScore">—</span> avg today</div>
+  <div id="cards"></div>
+
+  <div id="historySection" style="display:none">
+    <div class="section-title">7-day trend</div>
+    <div class="trend-card">
+      <div class="trend-title">Daily mood average</div>
+      <canvas id="trendChart" height="80"></canvas>
+    </div>
+    <div class="section-title">Log</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</div>
+
+<!-- Install prompt bar -->
+<div class="install-bar" id="installBar">
+  <div class="install-icon">⭐</div>
+  <div class="install-text">
+    <strong>Add Pulse to Home Screen</strong>
+    <span>Track mood anytime, offline</span>
+  </div>
+  <button class="install-action" id="installBtn">Install</button>
+  <button class="install-dismiss" onclick="dismissInstall()">✕</button>
+</div>
+
+<div class="notif-banner" id="notifBanner"></div>
+
+<script>
+// ─── Constants ────────────────────────────────────────────────────────────────
+const PERIODS = [
+  { id:'morning', label:'Morning', time:'8:00 AM',  color:'#f4a261', prompt:"How are you starting the day?",   hour:8,  min:0  },
+  { id:'midday',  label:'Mid-day', time:'12:30 PM', color:'#e8c97a', prompt:"How's the day going so far?",     hour:12, min:30 },
+  { id:'night',   label:'Night',   time:'9:00 PM',  color:'#8b9ec7', prompt:"How did today feel overall?",     hour:21, min:0  },
+];
+
+// ─── Data helpers ─────────────────────────────────────────────────────────────
+function todayKey() { return new Date().toISOString().slice(0,10); }
+function loadData() { try { return JSON.parse(localStorage.getItem('pulse_data') || '{}'); } catch { return {}; } }
+function saveData(d) { localStorage.setItem('pulse_data', JSON.stringify(d)); }
+let data = loadData();
+
+// ─── Date header ──────────────────────────────────────────────────────────────
+document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-US', {
+  weekday:'long', month:'long', day:'numeric'
+});
+
+// ─── Service Worker registration ──────────────────────────────────────────────
+let swReg = null;
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js').then(reg => {
+    swReg = reg;
+    console.log('[Pulse] SW registered', reg.scope);
+  }).catch(err => console.warn('[Pulse] SW registration failed', err));
+}
+
+// ─── PWA Install prompt ───────────────────────────────────────────────────────
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (!localStorage.getItem('pulse_install_dismissed')) {
+    setTimeout(() => document.getElementById('installBar').classList.add('show'), 2000);
+  }
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBar').classList.remove('show');
+  showToast('Pulse installed ✓');
+  localStorage.setItem('pulse_install_dismissed', '1');
+});
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  if (outcome === 'accepted') showToast('Installing Pulse…');
+  deferredInstallPrompt = null;
+  document.getElementById('installBar').classList.remove('show');
+});
+function dismissInstall() {
+  document.getElementById('installBar').classList.remove('show');
+  localStorage.setItem('pulse_install_dismissed', '1');
+}
+
+// ─── Notification permission & setup banner ───────────────────────────────────
+function checkSetupBanner() {
+  const banner = document.getElementById('setupBanner');
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default' && !localStorage.getItem('pulse_notif_dismissed')) {
+    banner.classList.add('visible');
+  }
+}
+async function requestNotifPermission() {
+  const perm = await Notification.requestPermission();
+  document.getElementById('setupBanner').classList.remove('visible');
+  if (perm === 'granted') {
+    showToast('Nudges enabled ✓');
+    scheduleNudges();
+  } else {
+    showToast('Notifications blocked — check browser settings');
+  }
+  localStorage.setItem('pulse_notif_dismissed', '1');
+}
+function dismissSetup() {
+  document.getElementById('setupBanner').classList.remove('visible');
+  localStorage.setItem('pulse_notif_dismissed', '1');
+}
+
+// ─── Nudge scheduling ─────────────────────────────────────────────────────────
+// Uses Web Notifications + setTimeout for same-session delivery.
+// For true background delivery, a push server is needed; this gives
+// "tab open" nudges plus native notifications when permission is granted.
+function scheduleNudges() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const now = new Date();
+  const today = data[todayKey()] || {};
+
+  PERIODS.forEach(p => {
+    const target = new Date(now);
+    target.setHours(p.hour, p.min, 0, 0);
+    const diff = target - now;
+    if (diff > 0 && !today[p.id]) {
+      setTimeout(() => {
+        const current = data[todayKey()] || {};
+        if (current[p.id]) return; // already done
+        new Notification('Pulse', {
+          body: `Time for your ${p.label.toLowerCase()} check-in 🌟`,
+          icon: './icon-192.svg',
+          tag: `pulse-${p.id}`,
+          requireInteraction: false
+        });
+        showToast(`${p.label} check-in time`);
+      }, diff);
+    }
+  });
+}
+
+// ─── Star helpers ─────────────────────────────────────────────────────────────
+function renderStarSvg(value, starIndex, color) {
+  const fillPct = Math.min(100, Math.max(0, (value - starIndex) * 100));
+  const uid = `c${starIndex}-${Math.random().toString(36).slice(2,7)}`;
+  return `<svg class="star-svg" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+    <defs><clipPath id="${uid}"><rect x="0" y="0" width="${(fillPct*0.44).toFixed(2)}" height="44"/></clipPath></defs>
+    <polygon points="22,4 27.5,17 42,18 31,28 34.5,42 22,35 9.5,42 13,28 2,18 16.5,17" fill="#2a2a35" stroke="#2a2a35" stroke-width="1.5" stroke-linejoin="round"/>
+    <polygon points="22,4 27.5,17 42,18 31,28 34.5,42 22,35 9.5,42 13,28 2,18 16.5,17" fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" clip-path="url(#${uid})"/>
+  </svg>`;
+}
+
+function renderStars(cardId, currentVal, color) {
+  let html = `<div class="star-container" id="stars-${cardId}">`;
+  for (let i=0; i<5; i++) {
+    html += `<div class="star-wrapper"
+      onmousemove="onStarHover('${cardId}',${i},event,this)"
+      onmouseleave="onStarLeave('${cardId}')"
+      onclick="onStarClick('${cardId}',${i},event,this)"
+      ontouchmove="onStarTouch('${cardId}',${i},event)"
+      ontouchend="onStarTouchEnd('${cardId}',${i},event)">
+      ${renderStarSvg(currentVal||0, i, color)}
+      <div class="star-left"></div><div class="star-right"></div>
+    </div>`;
+  }
+  return html + `</div>`;
+}
+
+function getVal(starIndex, event, el) {
+  const rect = el.getBoundingClientRect();
+  const x = (event.clientX ?? event.touches?.[0]?.clientX ?? rect.left + rect.width/2) - rect.left;
+  const pct = x / rect.width;
+  if (pct < 0.25) return starIndex + 0.25;
+  if (pct < 0.5)  return starIndex + 0.5;
+  if (pct < 0.75) return starIndex + 0.75;
+  return starIndex + 1;
+}
+
+function updateStarsDisplay(cardId, val, color) {
+  const c = document.getElementById(`stars-${cardId}`);
+  if (!c) return;
+  c.querySelectorAll('.star-wrapper').forEach((w,i) => {
+    w.innerHTML = renderStarSvg(val, i, color) + '<div class="star-left"></div><div class="star-right"></div>';
+  });
+}
+
+function showRating(cardId, val) {
+  const el = document.getElementById(`rating-display-${cardId}`);
+  if (!el) return;
+  el.textContent = (+val).toFixed(2).replace(/\.?0+$/,'') + ' / 5';
+  el.classList.add('visible');
+}
+
+function onStarHover(id, i, ev, el) {
+  const v = getVal(i, ev, el);
+  updateStarsDisplay(id, v, getPColor(id));
+  showRating(id, v);
+}
+function onStarLeave(id) {
+  const saved = getSavedRating(id);
+  updateStarsDisplay(id, saved, getPColor(id));
+  const el = document.getElementById(`rating-display-${id}`);
+  if (el && !saved) el.classList.remove('visible');
+}
+function onStarClick(id, i, ev, el) {
+  ev.preventDefault();
+  const v = getVal(i, ev, el);
+  setRating(id, v);
+  el.querySelector('.star-svg')?.classList.remove('star-pop');
+  void el.querySelector('.star-svg')?.offsetWidth;
+  el.querySelector('.star-svg')?.classList.add('star-pop');
+}
+function onStarTouch(id, i, ev) {
+  ev.preventDefault();
+  const touch = ev.touches[0];
+  const el = ev.currentTarget;
+  const v = getVal(i, { clientX: touch.clientX }, el);
+  updateStarsDisplay(id, v, getPColor(id));
+  showRating(id, v);
+  el.dataset.touchVal = v;
+}
+function onStarTouchEnd(id, i, ev) {
+  const el = ev.currentTarget;
+  const v = parseFloat(el.dataset.touchVal || getVal(i, {clientX: el.getBoundingClientRect().left + el.offsetWidth*0.75}, el));
+  setRating(id, v);
+}
+
+function setRating(id, v) {
+  const btn = document.getElementById(`submit-${id}`);
+  if (btn) btn.dataset.rating = v;
+  updateStarsDisplay(id, v, getPColor(id));
+  showRating(id, v);
+  checkSubmit(id);
+}
+function getSavedRating(id) {
+  const today = data[todayKey()] || {};
+  return today[id]?.rating || 0;
+}
+function getPColor(id) { return PERIODS.find(p=>p.id===id)?.color || '#e8c97a'; }
+function checkSubmit(id) {
+  const btn = document.getElementById(`submit-${id}`);
+  if (!btn) return;
+  const hasR = parseFloat(btn.dataset.rating||0) > 0;
+  const word = document.getElementById(`word-${id}`)?.value?.trim();
+  btn.disabled = !(hasR && word);
+}
+
+// ─── Render cards ─────────────────────────────────────────────────────────────
+function renderCards() {
+  const today = data[todayKey()] || {};
+  const container = document.getElementById('cards');
+  container.innerHTML = '';
+
+  PERIODS.forEach(p => {
+    const entry = today[p.id];
+    const card = document.createElement('div');
+    card.className = 'checkin-card ' + (entry ? 'completed' : 'active');
+
+    if (entry) {
+      card.innerHTML = `
+        <div class="period-row">
+          <div class="period-dot" style="background:${p.color}"></div>
+          <div class="period-label">${p.label}</div>
+          <div class="period-check">✓ ${entry.rating} ★</div>
+        </div>
+        <div class="completed-state">
+          <div class="completed-stars">${miniStars(entry.rating, p.color)}</div>
+          <div class="completed-word">${entry.word}</div>
+        </div>`;
+    } else {
+      card.innerHTML = `
+        <div class="period-row">
+          <div class="period-dot" style="background:${p.color}"></div>
+          <div class="period-label">${p.label}</div>
+          <div class="period-time">${p.time}</div>
+        </div>
+        <div class="star-section">
+          <div class="star-prompt">${p.prompt}</div>
+          ${renderStars(p.id, 0, p.color)}
+          <div class="rating-display"><div class="rating-number" id="rating-display-${p.id}"></div></div>
+        </div>
+        <div class="word-section">
+          <label class="word-label" for="word-${p.id}">One word</label>
+          <input class="word-input" id="word-${p.id}" type="text"
+            placeholder="calm, anxious, bright…" maxlength="24" autocomplete="off" autocorrect="off"
+            oninput="handleWord('${p.id}',this)">
+        </div>
+        <button class="submit-btn" id="submit-${p.id}" data-rating="0" disabled
+          onclick="submit('${p.id}')">Save check-in</button>`;
+    }
+    container.appendChild(card);
+  });
+
+  updatePill();
+  renderHistory();
+}
+
+function miniStars(val, color) {
+  let h = '';
+  for (let i=0; i<5; i++) {
+    const uid = `m${i}-${Math.random().toString(36).slice(2,6)}`;
+    const fp = Math.min(100, Math.max(0, (val-i)*100));
+    h += `<svg width="14" height="14" viewBox="0 0 44 44">
+      <defs><clipPath id="${uid}"><rect x="0" y="0" width="${(fp*0.44).toFixed(2)}" height="44"/></clipPath></defs>
+      <polygon points="22,4 27.5,17 42,18 31,28 34.5,42 22,35 9.5,42 13,28 2,18 16.5,17" fill="#2a2a35" stroke="#2a2a35" stroke-width="2"/>
+      <polygon points="22,4 27.5,17 42,18 31,28 34.5,42 22,35 9.5,42 13,28 2,18 16.5,17" fill="${color}" stroke="${color}" stroke-width="2" clip-path="url(#${uid})"/>
+    </svg>`;
+  }
+  return h;
+}
+
+function handleWord(id, input) {
+  input.value = input.value.replace(/\s+/g,'');
+  checkSubmit(id);
+}
+
+function submit(id) {
+  const btn = document.getElementById(`submit-${id}`);
+  const rating = parseFloat(btn.dataset.rating);
+  const word = document.getElementById(`word-${id}`).value.trim();
+  if (!rating || !word) return;
+
+  const key = todayKey();
+  if (!data[key]) data[key] = {};
+  data[key][id] = { rating, word, time: new Date().toISOString() };
+  saveData(data);
+  showToast(`${PERIODS.find(p=>p.id===id).label} saved ✓`);
+  renderCards();
+}
+
+// ─── Pill ─────────────────────────────────────────────────────────────────────
+function updatePill() {
+  const entries = Object.values(data[todayKey()] || {});
+  const pill = document.getElementById('avgPill');
+  if (!entries.length) { pill.style.display = 'none'; return; }
+  const avg = entries.reduce((s,e) => s+e.rating, 0) / entries.length;
+  document.getElementById('avgScore').textContent = avg.toFixed(1) + ' / 5';
+  pill.style.display = 'flex';
+}
+
+// ─── History ──────────────────────────────────────────────────────────────────
+function renderHistory() {
+  const allKeys = Object.keys(data).sort().reverse();
+  const section = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+  const pastDays = allKeys.filter(k => k !== todayKey() && Object.keys(data[k]).length > 0);
+  const todayHas = Object.keys(data[todayKey()]||{}).length > 0;
+  if (!todayHas && !pastDays.length) { section.style.display='none'; return; }
+  section.style.display = 'block';
+
+  list.innerHTML = '';
+  allKeys.slice(0,7).forEach(dk => {
+    const dd = data[dk];
+    const label = new Date(dk+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    PERIODS.forEach(p => {
+      const e = dd[p.id]; if (!e) return;
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.innerHTML = `
+        <div class="history-date">${label}</div>
+        <div class="history-period" style="color:${p.color}">${p.label.slice(0,3)}</div>
+        <div class="history-stars-mini">${miniStars(e.rating, p.color)}</div>
+        <div class="history-word">${e.word}</div>`;
+      list.appendChild(item);
+    });
+  });
+
+  drawChart(allKeys.slice(0,7));
+}
+
+function drawChart(days) {
+  const canvas = document.getElementById('trendChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth - 40;
+  const H = 80;
+  canvas.width = W*dpr; canvas.height = H*dpr;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  ctx.scale(dpr,dpr);
+
+  const pts = days.slice().reverse().map(k => {
+    const e = Object.values(data[k]);
+    return e.length ? e.reduce((s,x)=>s+x.rating,0)/e.length : null;
+  }).filter(v=>v!==null);
+
+  if (pts.length < 2) return;
+  ctx.clearRect(0,0,W,H);
+
+  ctx.strokeStyle = '#2a2a35'; ctx.lineWidth = 0.5;
+  [1,2,3,4,5].forEach(v => {
+    const y = H - ((v/5)*(H-16)) - 4;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  });
+
+  const step = W/(pts.length-1);
+  const toY = v => H - ((v/5)*(H-16)) - 4;
+
+  ctx.beginPath();
+  pts.forEach((v,i) => i===0 ? ctx.moveTo(0,toY(v)) : ctx.lineTo(i*step,toY(v)));
+  ctx.strokeStyle = '#e8c97a'; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
+
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(232,201,122,0.25)');
+  grad.addColorStop(1,'rgba(232,201,122,0)');
+  ctx.lineTo((pts.length-1)*step,H); ctx.lineTo(0,H);
+  ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+
+  pts.forEach((v,i) => {
+    ctx.beginPath(); ctx.arc(i*step,toY(v),3,0,Math.PI*2);
+    ctx.fillStyle='#e8c97a'; ctx.fill();
+  });
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const el = document.getElementById('notifBanner');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ─── Demo seed ────────────────────────────────────────────────────────────────
+function seedDemo() {
+  if (Object.keys(loadData()).length > 0) return;
+  const words = [
+    ['focused','steady','tired'],['groggy','clear','peaceful'],
+    ['energized','okay','drained'],['hopeful','content','restless'],
+    ['calm','bright','satisfied'],['anxious','grounded','grateful'],
+  ];
+  [-6,-5,-4,-3,-2,-1].forEach((offset,idx) => {
+    const d = new Date(); d.setDate(d.getDate()+offset);
+    const key = d.toISOString().slice(0,10);
+    data[key] = {};
+    const base = 2.5 + Math.sin(idx)*1.2;
+    PERIODS.forEach((p,pi) => {
+      data[key][p.id] = {
+        rating: Math.round(Math.max(1,Math.min(5,base+(Math.random()-0.5)))*4)/4,
+        word: words[idx][pi],
+        time: new Date(key).toISOString()
+      };
+    });
+  });
+  saveData(data);
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+seedDemo();
+renderCards();
+checkSetupBanner();
+scheduleNudges();
+</script>
+</body>
+</html>
