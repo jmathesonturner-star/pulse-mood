@@ -57,7 +57,7 @@
   .app { width: 100%; max-width: 480px; position: relative; z-index: 1; }
 
   /* ── Header ────────────────────────────────────────────── */
-  header { padding: 48px 0 32px; text-align: center; }
+  header { padding: 48px 0 32px; text-align: center; position: relative; }
   .wordmark {
     font-family: 'Instrument Serif', serif;
     font-size: 13px;
@@ -73,6 +73,84 @@
     margin-top: 6px;
     opacity: 0.9;
   }
+  .reset-btn {
+    position: absolute;
+    top: 52px; right: 0;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 6px 2px;
+    opacity: 0.6;
+    transition: opacity 0.2s, color 0.2s;
+  }
+  .reset-btn:hover { opacity: 1; color: #e87a7a; }
+
+  /* ── Confirm overlay ───────────────────────────────────── */
+  .confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13,13,16,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    padding: 24px;
+  }
+  .confirm-overlay.show { opacity: 1; pointer-events: auto; }
+  .confirm-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+  }
+  .confirm-box h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+  .confirm-box p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  .confirm-actions { display: flex; gap: 10px; }
+  .confirm-yes {
+    flex: 1;
+    background: #e87a7a;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .confirm-yes:hover { background: #d96a6a; }
+  .confirm-no {
+    flex: 1;
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .confirm-no:hover { background: var(--border); color: var(--text); }
 
   /* ── Setup banner ──────────────────────────────────────── */
   .setup-banner {
@@ -314,7 +392,20 @@
   <header>
     <div class="wordmark">Pulse</div>
     <div class="date-display" id="dateDisplay"></div>
+    <button class="reset-btn" onclick="showConfirm()">Reset</button>
   </header>
+
+  <!-- Confirm reset overlay -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <h3>Clear all data?</h3>
+      <p>This will permanently delete all your mood entries. There's no undo.</p>
+      <div class="confirm-actions">
+        <button class="confirm-yes" onclick="clearAllData()">Yes, clear it</button>
+        <button class="confirm-no" onclick="hideConfirm()">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Setup nudge banner -->
   <div class="setup-banner" id="setupBanner">
@@ -764,6 +855,23 @@ function seedDemo() {
     });
   });
   saveData(data);
+}
+
+// ─── Reset ────────────────────────────────────────────────────────────────────
+function showConfirm() {
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+function hideConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('show');
+}
+function clearAllData() {
+  localStorage.removeItem('pulse_data');
+  localStorage.removeItem('pulse_notif_dismissed');
+  data = {};
+  hideConfirm();
+  showToast('All data cleared');
+  renderCards();
+  checkSetupBanner();
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
