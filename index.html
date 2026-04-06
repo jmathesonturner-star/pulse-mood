@@ -67,8 +67,11 @@
     font-family: 'Instrument Serif', serif;
     font-size: 28px; color: var(--text); margin-top: 6px; opacity: 0.9;
   }
-  .reset-btn {
+  .header-actions {
     position: absolute; top: 52px; right: 0;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .reset-btn, .export-btn {
     background: none; border: none; color: var(--muted);
     font-size: 11px; font-family: 'DM Sans', sans-serif;
     letter-spacing: 0.1em; text-transform: uppercase;
@@ -76,6 +79,7 @@
     transition: opacity 0.2s, color 0.2s;
   }
   .reset-btn:hover { opacity: 1; color: #e87a7a; }
+  .export-btn:hover { opacity: 1; color: var(--accent); }
 
   /* ── Confirm overlay ─────────────────────────────────────── */
   .confirm-overlay {
@@ -290,7 +294,10 @@
   <header>
     <div class="wordmark">Pulse</div>
     <div class="date-display" id="dateDisplay"></div>
-    <button class="reset-btn" onclick="showConfirm()">Reset</button>
+    <div class="header-actions">
+      <button class="export-btn" onclick="exportCSV()">Export</button>
+      <button class="reset-btn" onclick="showConfirm()">Reset</button>
+    </div>
   </header>
 
   <div class="confirm-overlay" id="confirmOverlay">
@@ -818,6 +825,41 @@ function showToast(msg) {
   const el=document.getElementById('notifBanner');
   el.textContent=msg; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ─── Export ───────────────────────────────────────────────────────────────────
+function exportCSV() {
+  const allKeys = Object.keys(data).sort();
+  if (!allKeys.length) { showToast('No data to export'); return; }
+
+  const rows = [
+    ['Date', 'Period', 'Rating', 'Word', 'Timestamp']
+  ];
+
+  allKeys.forEach(dateKey => {
+    PERIODS.forEach(p => {
+      const e = data[dateKey][p.id];
+      if (!e) return;
+      rows.push([
+        dateKey,
+        p.label,
+        e.rating,
+        e.word,
+        e.time || ''
+      ]);
+    });
+  });
+
+  const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const filename = `pulse-export-${new Date().toISOString().slice(0,10)}.csv`;
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`Exported ${rows.length - 1} entries`);
 }
 
 // ─── Reset ────────────────────────────────────────────────────────────────────
