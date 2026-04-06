@@ -1,212 +1,3 @@
-
-I want to create a simple mood tracking interface with proactively nudges me 3 times per day (morning, mid day, and night) to help me measure and track my  mood fluctuations. The interface should be really simple and use a star measurement system (1-5 stars) with the ability to choose quarter or half star options. Each nudge should also prompt a one word reflection to correspond with the rating.
-
-4:35 PM
-
-Viewed a file, created a file, read a file
-Viewed a file, created a file, read a file
-Here's Pulse — your daily mood tracker. Here's what's built in:
-
-Rating system — click anywhere on a star to get quarter-star precision (0.25 increments). Hover shows a live fractional preview below the stars.
-
-Three daily check-ins — Morning (8am), Mid-day (12:30pm), and Night (9pm). Each has a contextual prompt, the star rating, and a one-word reflection field (enforces single word).
-
-Nudges — the app requests browser notification permission on load and queues timed alerts for each uncompleted check-in. The in-app banner also fires at each window.
-
-History & trend — a 7-day sparkline chart and a scrollable log below your daily cards, seeded with demo data so you can see the layout immediately.
-
-Persistence — everything saves to localStorage, so your data survives page refreshes.
-
-A few things worth noting for your workflow:
-
-Since this runs locally in the browser, the scheduled nudges only fire while the tab is open. For true background nudges, you'd want to pin this tab or convert it to a simple PWA — happy to help with that if you want
-The one-word field rejects spaces, keeping it to a single word as intended
-You can clear demo data by opening DevTools → Application → Local Storage and deleting the pulse_data key
-Mood tracker
-Code · HTML 
-Let’s convert it to a simple PWA
-
-4:40 PM
-
-Reading the existing mood tracker HTML
-Reading the existing mood tracker HTML
-Good — I have the full file. A proper PWA needs three files: the main index.html, a manifest.json, and a service-worker.js. The service worker is the key piece — it handles background push notifications so nudges fire even when the tab is closed. Let me build all three.
-
-
-Created 4 files
-Created 4 files
-Now the main index.html — updated with the manifest link, SW registration, push subscription flow, and a setup screen that walks through install + notification permission:
-
-
-Main index.html for Pulse PWA - full app with SW registration and push notifications
-Main index.html for Pulse PWA - full app with SW registration and push notifications
-Now a clear README with setup instructions:
-
-
-Created a file, read a file
-Created a file, read a file
-Here's your complete PWA package — 6 files to download and deploy together.
-
-What was added/changed:
-
-The service-worker.js handles two things: caches all assets so the app works fully offline after first load, and routes notification clicks back to the app when it's not in focus. The manifest.json tells the browser this is an installable app with a dark theme and proper icons. index.html now has the manifest link, safe-area insets for iPhone notches, touch-optimized star interactions, and a setup banner that walks through enabling notifications on first open.
-
-Deploying (the README has full detail, but the short version):
-
-The fastest path is Netlify drop — go to netlify.com, drag the entire pulse-pwa folder onto the dashboard, and you get a live URL in about 30 seconds. Then on your iPhone, open the URL in Safari → Share → Add to Home Screen. That's it — it'll appear as a proper app icon with no browser chrome.
-
-One honest caveat on background nudges: The nudges fire reliably when the app is open or the tab is active. True background delivery (fires when the app is fully closed) requires a push server sending a signal at the right time — there's no way around that with a pure static file. The README has notes on the easiest paths forward if you want to add that layer later.
-
-Index
-Code · HTML 
-Service worker
-JS 
-Manifest
-Code · JSON 
-Icon 192
-Image · SVG 
-Icon 512
-Image · SVG 
-Readme
-Document · MD 
-I’ve never done the GitHub route and need some additional direction
-
-4:58 PM
-Happy to walk you through it — it's genuinely simple once you see it once.
-
-Step 1 — Create a GitHub account Go to github.com and sign up. Free tier is all you need.
-
-Step 2 — Create a new repository Once logged in, click the + in the top right → "New repository." Name it something like pulse-mood. Make sure it's set to Public (required for free GitHub Pages). Leave everything else as-is and click "Create repository."
-
-Step 3 — Upload your files On the repository page you'll see a link that says "uploading an existing file" — click that. Drag all 6 files from the pulse-pwa folder onto the upload area. Make sure you're uploading the files themselves, not the folder. Then scroll down and click Commit changes.
-
-Step 4 — Enable GitHub Pages Go to Settings (tab at the top of your repo) → scroll down the left sidebar to Pages. Under "Source," select Deploy from a branch, choose main branch and / (root) folder, then click Save.
-
-Step 5 — Wait ~60 seconds GitHub will build and deploy. Refresh the Pages settings screen until you see a green banner with your URL — it'll be something like https://yourusername.github.io/pulse-mood/.
-
-Step 6 — Add to your iPhone home screen Open that URL in Safari (must be Safari, not Chrome, for the Add to Home Screen option to work as a real PWA). Tap the Share icon → scroll down → Add to Home Screen → Add. Pulse will appear as a full-screen app on your home screen with the gold star icon.
-
-The whole thing should take under 10 minutes. Let me know where you get stuck.
-
-I’m having trouble with the upload step
-
-4:59 PM
-What's the specific snag? A few common ones at that step:
-
-The drag target isn't appearing — after clicking "uploading an existing file," you should land on a page with a big dashed box that says "Drag files here." If you don't see it, try a different browser (Chrome works well for this).
-
-You're dragging the folder instead of the files — open the pulse-pwa folder on your Mac first, then select all 6 files inside it (Cmd+A), and drag that selection onto the GitHub page. GitHub doesn't accept folders via drag-and-drop, only individual files.
-
-You can't find the "uploading an existing file" link — if your repo was just created and is empty, it shows on the main repo page as a small text link in the middle of the screen. It's easy to miss. Alternatively, you can click the Add file button (top right of the file list area) → "Upload files."
-
-Which of those is closest to what you're seeing, or is it something different?
-
-Maybe the issue is trying to do this on my phone. I will try on my Mac later
-
-5:00 PM
-That's almost certainly it — the GitHub drag-and-drop upload really doesn't work well on mobile. On your Mac it'll be smooth, maybe 2 minutes for the whole upload step.
-
-When you sit down at your Mac, just pick up at Step 3 — your repo is already created so you're most of the way there. Let me know how it goes.
-
-How can I clear demo data?
-
-6:12 PM
-On your Mac, open the app in your browser and:
-
-Right-click anywhere on the page → Inspect (or Cmd+Option+I)
-Click the Application tab at the top of DevTools
-In the left sidebar, expand Local Storage → click the entry that shows your app's URL
-Find the row with the key pulse_data → click it → hit the Delete key
-Refresh the page and you'll start fresh with no demo entries.
-
-On your iPhone after you've installed it as a PWA, there's no DevTools access, so the easiest path is to add a small clear button to the app. Want me to add that to the code — something discreet like a reset option tucked in the header?
-
-Yes, please add that clear button and let me know the steps to update in Github
-
-6:13 PM
-
-Edited 3 files, viewed a file, read a file
-Edited 3 files, viewed a file, read a file
-Done. There's now a quiet "Reset" label in the top-right corner of the header. Tapping it opens a confirmation overlay before anything is deleted — no accidental wipes.
-
-To update on GitHub — you only need to replace index.html, since that's the only file that changed:
-
-Go to your repository on github.com
-Click on index.html in the file list
-Click the pencil icon (Edit) in the top-right of the file preview
-Select all the text in the editor (Cmd+A) and delete it
-Open the new index.html you just downloaded, select all (Cmd+A), copy, and paste it into the GitHub editor
-Scroll down and click Commit changes
-GitHub Pages will redeploy automatically in about 60 seconds. Refresh the app on your phone and the Reset button will be there.
-
-Index
-Code · HTML 
-Is there anything about the app that you'd recommend we improve?
-
-6:20 PM
-A few things come to mind across different categories:
-
-Functional gaps
-
-The biggest one is the background nudge limitation I mentioned — right now if the app tab is closed, no nudge fires. For a habit-forming tool, that's a meaningful gap. A Cloudflare Worker could handle this with minimal setup and no cost, if you ever want to tackle it.
-
-There's also no way to edit a submitted entry. If you fat-finger a word or tap the wrong star count, your only option right now is nuking everything with the reset button. A simple tap-to-edit on completed cards would fix that.
-
-Tracking depth
-
-The one-word reflection is intentionally minimal, which I like — but there's no way to spot patterns in your words over time. A simple word frequency view ("you've used 'anxious' 6 times this week") could surface something useful without adding much complexity.
-
-Right now the trend chart only shows daily averages, flattening the within-day variation. Given that you specifically wanted to track mood fluctuations, a view that plots all three daily check-ins as separate points on the same line would actually show your intraday arc — which seems like the whole point.
-
-Experience polish
-
-The app resets the notification permission banner when you clear data, which is slightly annoying if you're just clearing demo entries. Those two things should probably be decoupled.
-
-On iPhone there's no haptic feedback on star selection — a subtle vibration on tap would make the rating feel more tactile and satisfying.
-
-Of those, I'd prioritize tap-to-edit and the intraday chart as the highest value. The nudge infrastructure is the most impactful but also the most work. Want me to take a swing at any of them?
-
-Lets tackle all three
-
-6:21 PM
-Let me work through them in order — tap-to-edit, intraday chart, and decoupling the notification banner from reset.
-
-
-Reading full current index.html
-Reading full current index.html
-Good, I have the full picture. Now I'll rebuild index.html with all three improvements baked in cleanly:
-
-
-Created 2 files, ran a command, read a file
-Created 2 files, ran a command, read a file
-Done — only index.html changed, so that's the only file you need to update on GitHub.
-
-What's new:
-
-Tap-to-edit — completed cards now show a faint "Edit" label on hover/press. Tapping anywhere on a completed card reopens the full form pre-filled with your existing rating and word. The submit button changes to "Update check-in" so it's clear you're editing. Cancel drops you back to the completed view without saving.
-
-Intraday chart — the trend section now has a Daily / Today toggle. "Today" plots your three check-ins as separate color-coded nodes (morning orange, midday gold, night blue) connected by a faint dashed line, with the rating value above each dot and your one-word reflection below. Pending periods show as empty rings so you can see what's still outstanding at a glance.
-
-Decoupled notification banner — clearing your data no longer resets the notification preference. The banner only re-appears if your browser permission is genuinely unresolved (i.e., you never answered it), not just because you wiped your entries.
-
-To update on GitHub:
-
-Go to your repo → click index.html
-Click the pencil (Edit) icon
-Select all → delete → paste in the new file contents
-Click Commit changes
-That's it — one file, same steps as before.
-
-Index
-Code · HTML 
-
-
-
-
-Claude is AI and can make mistakes. Please double-check responses.
-Index · HTML
-Copy
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -236,9 +27,9 @@ Copy
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
- 
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
- 
+
   body {
     background: var(--bg);
     color: var(--text);
@@ -251,7 +42,7 @@ Copy
     padding: 0 16px calc(60px + var(--safe-bottom));
     padding-top: var(--safe-top);
   }
- 
+
   body::before {
     content: '';
     position: fixed;
@@ -262,9 +53,9 @@ Copy
     pointer-events: none;
     z-index: 0;
   }
- 
+
   .app { width: 100%; max-width: 480px; position: relative; z-index: 1; }
- 
+
   /* ── Header ─────────────────────────────────────────────── */
   header { padding: 48px 0 32px; text-align: center; position: relative; }
   .wordmark {
@@ -285,7 +76,7 @@ Copy
     transition: opacity 0.2s, color 0.2s;
   }
   .reset-btn:hover { opacity: 1; color: #e87a7a; }
- 
+
   /* ── Confirm overlay ─────────────────────────────────────── */
   .confirm-overlay {
     position: fixed; inset: 0;
@@ -315,7 +106,7 @@ Copy
     font-size: 13px; cursor: pointer; transition: background 0.2s;
   }
   .confirm-no:hover { background: var(--border); color: var(--text); }
- 
+
   /* ── Setup banner ────────────────────────────────────────── */
   .setup-banner {
     background: var(--surface); border: 1px solid var(--accent);
@@ -337,7 +128,7 @@ Copy
     background: transparent; border: 1px solid var(--border); color: var(--muted);
   }
   .setup-btn.secondary:hover { border-color: var(--muted); color: var(--text); background: transparent; }
- 
+
   /* ── Install bar ─────────────────────────────────────────── */
   .install-bar {
     position: fixed;
@@ -365,7 +156,7 @@ Copy
     background: none; border: none; color: var(--muted);
     font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1;
   }
- 
+
   /* ── Check-in cards ──────────────────────────────────────── */
   .checkin-card {
     background: var(--surface); border: 1px solid var(--border);
@@ -375,20 +166,20 @@ Copy
   .checkin-card.active { border-color: var(--accent); }
   .checkin-card.completed { opacity: 0.75; cursor: pointer; }
   .checkin-card.editing { border-color: var(--accent); opacity: 1; }
- 
+
   .period-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
   .period-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .period-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
   .period-time { margin-left: auto; font-size: 12px; color: var(--muted); }
   .period-check { font-size: 14px; color: var(--accent); }
- 
+
   .edit-hint {
     margin-left: auto; font-size: 11px; color: var(--muted);
     letter-spacing: 0.08em; text-transform: uppercase;
     opacity: 0; transition: opacity 0.2s;
   }
   .checkin-card.completed:hover .edit-hint { opacity: 1; }
- 
+
   /* ── Stars ───────────────────────────────────────────────── */
   .star-section { margin-bottom: 20px; }
   .star-prompt { font-family: 'Instrument Serif', serif; font-size: 20px; color: var(--text); margin-bottom: 16px; line-height: 1.3; }
@@ -399,11 +190,11 @@ Copy
   .star-wrapper:active .star-svg { transform: scale(0.95); }
   .star-left, .star-right { position: absolute; top: 0; width: 50%; height: 100%; z-index: 2; }
   .star-left { left: 0; } .star-right { right: 0; }
- 
+
   .rating-display { text-align: center; margin-top: 10px; height: 20px; }
   .rating-number { font-family: 'Instrument Serif', serif; font-size: 16px; color: var(--accent); opacity: 0; transition: opacity 0.2s; }
   .rating-number.visible { opacity: 1; }
- 
+
   /* ── Word input ──────────────────────────────────────────── */
   .word-section { margin-top: 4px; }
   .word-label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: block; }
@@ -415,7 +206,7 @@ Copy
   }
   .word-input::placeholder { color: var(--muted); font-style: italic; }
   .word-input:focus { border-color: var(--accent); }
- 
+
   /* ── Buttons ─────────────────────────────────────────────── */
   .submit-btn {
     width: 100%; background: var(--accent); color: #0d0d10;
@@ -435,12 +226,12 @@ Copy
     cursor: pointer; margin-top: 8px; transition: border-color 0.2s, color 0.2s;
   }
   .cancel-edit-btn:hover { border-color: var(--muted); color: var(--text); }
- 
+
   /* ── Completed state ─────────────────────────────────────── */
   .completed-state { text-align: center; padding: 8px 0; }
   .completed-stars { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
   .completed-word { font-family: 'Instrument Serif', serif; font-size: 16px; color: var(--muted); font-style: italic; }
- 
+
   /* ── History ─────────────────────────────────────────────── */
   .section-title { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin: 32px 0 14px; padding: 0 4px; }
   .history-list { display: flex; flex-direction: column; gap: 8px; }
@@ -453,7 +244,7 @@ Copy
   .history-period { font-size: 11px; min-width: 48px; text-transform: uppercase; letter-spacing: 0.1em; }
   .history-stars-mini { display: flex; gap: 2px; }
   .history-word { font-family: 'Instrument Serif', serif; font-size: 15px; color: var(--text); margin-left: auto; font-style: italic; }
- 
+
   /* ── Chart ───────────────────────────────────────────────── */
   .trend-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-top: 12px; }
   .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
@@ -468,7 +259,7 @@ Copy
   }
   .chart-tab.active { background: var(--border); color: var(--text); }
   canvas { width: 100% !important; display: block; }
- 
+
   /* ── Avg pill ────────────────────────────────────────────── */
   .avg-pill {
     display: none; align-items: center; gap: 6px;
@@ -477,7 +268,7 @@ Copy
     font-size: 12px; color: var(--muted); width: fit-content; margin: 0 auto 28px;
   }
   .avg-pill span { color: var(--accent); font-family: 'Instrument Serif', serif; font-size: 15px; }
- 
+
   /* ── Toast ───────────────────────────────────────────────── */
   .notif-banner {
     position: fixed; top: calc(16px + var(--safe-top)); left: 50%;
@@ -488,20 +279,20 @@ Copy
     transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); white-space: nowrap;
   }
   .notif-banner.show { transform: translateX(-50%) translateY(0); }
- 
+
   @keyframes starPop { 0%{transform:scale(1)} 40%{transform:scale(1.3)} 100%{transform:scale(1)} }
   .star-pop { animation: starPop 0.25s ease; }
 </style>
 </head>
 <body>
- 
+
 <div class="app">
   <header>
     <div class="wordmark">Pulse</div>
     <div class="date-display" id="dateDisplay"></div>
     <button class="reset-btn" onclick="showConfirm()">Reset</button>
   </header>
- 
+
   <div class="confirm-overlay" id="confirmOverlay">
     <div class="confirm-box">
       <h3>Clear all data?</h3>
@@ -512,7 +303,7 @@ Copy
       </div>
     </div>
   </div>
- 
+
   <div class="setup-banner" id="setupBanner">
     <div class="setup-title">Enable nudges ✦</div>
     <div class="setup-body">Allow notifications so Pulse can remind you to check in at 8 AM, 12:30 PM, and 9 PM — even when the app isn't open.</div>
@@ -521,10 +312,10 @@ Copy
       <button class="setup-btn secondary" onclick="dismissSetup()">Maybe later</button>
     </div>
   </div>
- 
+
   <div id="avgPill" class="avg-pill"><span id="avgScore">—</span> avg today</div>
   <div id="cards"></div>
- 
+
   <div id="historySection" style="display:none">
     <div class="section-title">Mood trend</div>
     <div class="trend-card">
@@ -541,7 +332,7 @@ Copy
     <div class="history-list" id="historyList"></div>
   </div>
 </div>
- 
+
 <div class="install-bar" id="installBar">
   <div class="install-icon">⭐</div>
   <div class="install-text">
@@ -551,9 +342,9 @@ Copy
   <button class="install-action" id="installBtn">Install</button>
   <button class="install-dismiss" onclick="dismissInstall()">✕</button>
 </div>
- 
+
 <div class="notif-banner" id="notifBanner"></div>
- 
+
 <script>
 // ─── Constants ────────────────────────────────────────────────────────────────
 const PERIODS = [
@@ -561,7 +352,7 @@ const PERIODS = [
   { id:'midday',  label:'Mid-day', time:'12:30 PM', color:'#e8c97a', prompt:"How's the day going so far?",    hour:12, min:30 },
   { id:'night',   label:'Night',   time:'9:00 PM',  color:'#8b9ec7', prompt:"How did today feel overall?",    hour:21, min:0  },
 ];
- 
+
 // ─── Data ─────────────────────────────────────────────────────────────────────
 function todayKey() { return new Date().toISOString().slice(0,10); }
 function loadData() { try { return JSON.parse(localStorage.getItem('pulse_data')||'{}'); } catch { return {}; } }
@@ -570,19 +361,19 @@ let data = loadData();
 let editingId = null;
 let activeChart = 'daily';
 let swReg = null;
- 
+
 // ─── Date display ─────────────────────────────────────────────────────────────
 document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-US',{
   weekday:'long', month:'long', day:'numeric'
 });
- 
+
 // ─── Service Worker ───────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./service-worker.js')
     .then(r => { swReg = r; })
     .catch(e => console.warn('[Pulse] SW failed', e));
 }
- 
+
 // ─── Install prompt ───────────────────────────────────────────────────────────
 let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
@@ -608,7 +399,7 @@ function dismissInstall() {
   document.getElementById('installBar').classList.remove('show');
   localStorage.setItem('pulse_install_dismissed','1');
 }
- 
+
 // ─── Notifications ────────────────────────────────────────────────────────────
 // Decoupled from data: banner reappears only if permission is not yet granted,
 // regardless of whether the user has cleared their mood data.
@@ -651,7 +442,7 @@ function scheduleNudges() {
     }
   });
 }
- 
+
 // ─── Stars ────────────────────────────────────────────────────────────────────
 function renderStarSvg(value, starIndex, color) {
   const fillPct = Math.min(100, Math.max(0, (value - starIndex) * 100));
@@ -662,7 +453,7 @@ function renderStarSvg(value, starIndex, color) {
     <polygon points="22,4 27.5,17 42,18 31,28 34.5,42 22,35 9.5,42 13,28 2,18 16.5,17" fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" clip-path="url(#${uid})"/>
   </svg>`;
 }
- 
+
 function renderStars(cardId, currentVal, color) {
   let html = `<div class="star-container" id="stars-${cardId}">`;
   for (let i=0; i<5; i++) {
@@ -678,7 +469,7 @@ function renderStars(cardId, currentVal, color) {
   }
   return html + `</div>`;
 }
- 
+
 function getVal(starIndex, event, el) {
   const rect = el.getBoundingClientRect();
   const x = (event.clientX ?? event.touches?.[0]?.clientX ?? rect.left + rect.width/2) - rect.left;
@@ -688,7 +479,7 @@ function getVal(starIndex, event, el) {
   if (pct < 0.75) return starIndex + 0.75;
   return starIndex + 1;
 }
- 
+
 function updateStarsDisplay(cardId, val, color) {
   const c = document.getElementById(`stars-${cardId}`);
   if (!c) return;
@@ -696,14 +487,14 @@ function updateStarsDisplay(cardId, val, color) {
     w.innerHTML = renderStarSvg(val,i,color)+'<div class="star-left"></div><div class="star-right"></div>';
   });
 }
- 
+
 function showRating(cardId, val) {
   const el = document.getElementById(`rating-display-${cardId}`);
   if (!el) return;
   el.textContent = (+val).toFixed(2).replace(/\.?0+$/,'') + ' / 5';
   el.classList.add('visible');
 }
- 
+
 function onStarHover(id,i,ev,el) {
   const v = getVal(i,ev,el);
   updateStarsDisplay(id,v,getPColor(id)); showRating(id,v);
@@ -756,18 +547,18 @@ function checkSubmit(id) {
   const word = document.getElementById(`word-${id}`)?.value?.trim();
   btn.disabled = !(hasR && word);
 }
- 
+
 // ─── Cards ────────────────────────────────────────────────────────────────────
 function renderCards() {
   const today = data[todayKey()] || {};
   const container = document.getElementById('cards');
   container.innerHTML = '';
- 
+
   PERIODS.forEach(p => {
     const entry = today[p.id];
     const isEditing = editingId === p.id;
     const card = document.createElement('div');
- 
+
     if (entry && !isEditing) {
       // ── Completed — tap anywhere to edit ──
       card.className = 'checkin-card completed';
@@ -820,11 +611,11 @@ function renderCards() {
     }
     container.appendChild(card);
   });
- 
+
   updatePill();
   renderHistory();
 }
- 
+
 function startEdit(id) {
   editingId = id;
   renderCards();
@@ -833,7 +624,7 @@ function startEdit(id) {
   }, 50);
 }
 function cancelEdit() { editingId = null; renderCards(); }
- 
+
 function miniStars(val, color) {
   let h = '';
   for (let i=0; i<5; i++) {
@@ -848,7 +639,7 @@ function miniStars(val, color) {
   return h;
 }
 function handleWord(id, input) { input.value = input.value.replace(/\s+/g,''); checkSubmit(id); }
- 
+
 function submitEntry(id) {
   const btn = document.getElementById(`submit-${id}`);
   const rating = parseFloat(btn.dataset.rating);
@@ -863,7 +654,7 @@ function submitEntry(id) {
   showToast(isEdit ? `${PERIODS.find(p=>p.id===id).label} updated ✓` : `${PERIODS.find(p=>p.id===id).label} saved ✓`);
   renderCards();
 }
- 
+
 // ─── Avg pill ─────────────────────────────────────────────────────────────────
 function updatePill() {
   const entries = Object.values(data[todayKey()]||{});
@@ -873,7 +664,7 @@ function updatePill() {
   document.getElementById('avgScore').textContent = avg.toFixed(1)+' / 5';
   pill.style.display = 'flex';
 }
- 
+
 // ─── History ──────────────────────────────────────────────────────────────────
 function renderHistory() {
   const allKeys = Object.keys(data).sort().reverse();
@@ -883,7 +674,7 @@ function renderHistory() {
   const pastHas = allKeys.some(k=>k!==todayKey()&&Object.keys(data[k]).length>0);
   if (!todayHas && !pastHas) { section.style.display='none'; return; }
   section.style.display='block';
- 
+
   list.innerHTML='';
   allKeys.slice(0,7).forEach(dk=>{
     const dd=data[dk];
@@ -900,10 +691,10 @@ function renderHistory() {
       list.appendChild(item);
     });
   });
- 
+
   activeChart==='daily' ? drawDailyChart(allKeys.slice(0,7)) : drawIntradayChart();
 }
- 
+
 function switchChart(mode) {
   activeChart=mode;
   document.getElementById('tab-daily').classList.toggle('active',mode==='daily');
@@ -912,7 +703,7 @@ function switchChart(mode) {
   const allKeys=Object.keys(data).sort().reverse();
   mode==='daily' ? drawDailyChart(allKeys.slice(0,7)) : drawIntradayChart();
 }
- 
+
 // Chart helpers
 function getCanvas() {
   const canvas=document.getElementById('trendChart');
@@ -940,7 +731,7 @@ function drawEmptyState(ctx,W,H,msg) {
   ctx.fillStyle='#2a2a35'; ctx.font='12px DM Sans,sans-serif'; ctx.textAlign='center';
   ctx.fillText(msg,W/2,H/2+4);
 }
- 
+
 // Daily average chart
 function drawDailyChart(days) {
   const r=getCanvas(); if(!r) return;
@@ -966,7 +757,7 @@ function drawDailyChart(days) {
     ctx.fillStyle='#e8c97a'; ctx.fill();
   });
 }
- 
+
 // Intraday chart — shows today's three check-ins as separate colored nodes
 function drawIntradayChart() {
   const r=getCanvas(); if(!r) return;
@@ -976,10 +767,10 @@ function drawIntradayChart() {
   if(!entries.length){drawEmptyState(ctx,W,H,'No check-ins yet today');return;}
   ctx.clearRect(0,0,W,H);
   drawGridLines(ctx,W,H);
- 
+
   const toY=v=>H-((v/5)*(H-24))-10;
   const xPos={morning:W*0.15, midday:W*0.5, night:W*0.85};
- 
+
   // Dashed connector between completed entries
   if(entries.length>1){
     ctx.beginPath();
@@ -990,7 +781,7 @@ function drawIntradayChart() {
     ctx.strokeStyle='rgba(240,239,232,0.12)'; ctx.lineWidth=1.5;
     ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
   }
- 
+
   // Draw each period
   PERIODS.forEach(p=>{
     const x=xPos[p.id];
@@ -998,7 +789,7 @@ function drawIntradayChart() {
     // Period label at bottom
     ctx.fillStyle='#6b6b7a'; ctx.font='9px DM Sans,sans-serif'; ctx.textAlign='center';
     ctx.fillText(p.label.toUpperCase(),x,H-1);
- 
+
     if(e){
       const y=toY(e.rating);
       // Glow halo
@@ -1021,14 +812,14 @@ function drawIntradayChart() {
     }
   });
 }
- 
+
 // ─── Toast ────────────────────────────────────────────────────────────────────
 function showToast(msg) {
   const el=document.getElementById('notifBanner');
   el.textContent=msg; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'),3000);
 }
- 
+
 // ─── Reset ────────────────────────────────────────────────────────────────────
 function showConfirm() { document.getElementById('confirmOverlay').classList.add('show'); }
 function hideConfirm() { document.getElementById('confirmOverlay').classList.remove('show'); }
@@ -1042,7 +833,7 @@ function clearAllData() {
   // Re-check banner only if permission is genuinely unresolved
   checkSetupBanner();
 }
- 
+
 // ─── Demo seed ────────────────────────────────────────────────────────────────
 function seedDemo() {
   if(Object.keys(loadData()).length>0) return;
@@ -1065,7 +856,7 @@ function seedDemo() {
   });
   saveData(data);
 }
- 
+
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 seedDemo();
 renderCards();
@@ -1074,4 +865,3 @@ scheduleNudges();
 </script>
 </body>
 </html>
- 
